@@ -1,16 +1,35 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useTransition, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Shield, AlertCircle, CheckCircle2, ArrowRight, UserCheck } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [customEmail, setCustomEmail] = useState("");
   const [customName, setCustomName] = useState("");
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    const detailsParam = searchParams.get("details");
+    const emailParam = searchParams.get("email");
+
+    if (errorParam === "domain_not_allowed") {
+      setErrorMsg(`Accés denegat: El compte ${emailParam || ""} no pertany al domini @lacetania.cat ni a la llista autoritzada.`);
+    } else if (errorParam === "token_exchange_failed") {
+      setErrorMsg(`Error autenticant amb Google: ${detailsParam || "Token invàlid"}. Comprova la configuració a Vercel.`);
+    } else if (errorParam === "email_not_provided") {
+      setErrorMsg("Google no ha proporcionat cap adreça de correu.");
+    } else if (errorParam === "internal_auth_error") {
+      setErrorMsg(`Error intern de base de dades o sessió: ${detailsParam || "Error al servidor"}.`);
+    } else if (errorParam === "oauth_cancelled") {
+      setErrorMsg("S'ha cancel·lat l'inici de sessió amb Google.");
+    }
+  }, [searchParams]);
 
   const handleDevLogin = async (email: string, name: string, roleName: string) => {
     setErrorMsg(null);
@@ -213,5 +232,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

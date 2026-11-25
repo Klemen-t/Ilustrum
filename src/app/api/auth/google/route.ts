@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "https://10.51.100.102"}/api/auth/callback/google`;
+  const origin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+  const redirectUri = `${origin.replace(/\/$/, "")}/api/auth/callback/google`;
   const domain = process.env.ALLOWED_EMAIL_DOMAIN || "lacetania.cat";
 
   if (!clientId || clientId.includes("canvia_per")) {

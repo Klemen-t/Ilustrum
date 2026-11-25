@@ -5,15 +5,15 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://10.51.100.102";
+  const origin = (process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin).replace(/\/$/, "");
 
   if (error || !code) {
-    return NextResponse.redirect(new URL(`/login?error=oauth_cancelled`, appUrl));
+    return NextResponse.redirect(new URL(`/login?error=oauth_cancelled`, origin));
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = `${appUrl}/api/auth/callback/google`;
+  const redirectUri = `${origin}/api/auth/callback/google`;
 
   try {
     // 1. Canviar el codi temporal pel token d'accés de Google
@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
 
     if (!tokenResponse.ok || !tokenData.access_token) {
       console.error("Error obtenint token de Google:", tokenData);
-      return NextResponse.redirect(new URL("/login?error=token_exchange_failed", appUrl));
+      const desc = encodeURIComponent(tokenData.error_description || tokenData.error || "token_exchange_failed");
+      return NextResponse.redirect(new URL(`/login?error=token_exchange_failed&details=${desc}`, origin));
     }
 
     // 2. Obtenir les dades del perfil de l'usuari des de Google
@@ -44,16 +45,16 @@ export async function GET(request: NextRequest) {
     const profile = await userinfoResponse.json();
 
     if (!profile.email) {
-      return NextResponse.redirect(new URL("/login?error=email_not_provided", appUrl));
+      return NextResponse.redirect(new URL("/login?error=email_not_provided", origin));
     }
 
     const email = profile.email.toLowerCase().trim();
 
-    // 3. SEGURETAT SERVER-SIDE: Validar estrictament el domini @lacetania.cat
+    // 3. SEGURETAT SERVER-SIDE: Validar estrictament el domini @lacetania.cat o llista blanca
     if (!isAllowedDomain(email)) {
       console.warn(`[SEGURETAT] Intent d'accés no autoritzat amb compte extern: ${email}`);
       return NextResponse.redirect(
-        new URL(`/login?error=domain_not_allowed&email=${encodeURIComponent(email)}`, appUrl)
+        new URL(`/login?error=domain_not_allowed&email=${encodeURIComponent(email)}`, origin)
       );
     }
 
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
       googleId: profile.sub || null,
     });
 
-    // 5. Crear el token JWT de sessió i establir la cookie segura
+    // 5. Crear el token JWT de sessió
     const sessionToken = await createSessionToken({
       userId: user.id,
       email: user.email,
@@ -73,12 +74,20 @@ export async function GET(request: NextRequest) {
       role: user.role.name,
     });
 
-    await setSessionCookie(sessionToken);
+    // 6. Redirigir al Dashboard adjuntant explícitament la cookie de sessió segura
+    const redirectResponse = NextResponse.redirect(new URL("/dashboard", origin));
+    redirectResponse.cookies.set("ilustrum_session", sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60, // 7 dies
+    });
 
-    // 6. Redirigir al Dashboard de l'usuari
-    return NextResponse.redirect(new URL("/dashboard", appUrl));
+    return redirectResponse;
   } catch (err: unknown) {
     console.error("Error en el procés de callback OAuth:", err);
-    return NextResponse.redirect(new URL("/login?error=internal_auth_error", appUrl));
+    const errMessage = encodeURIComponent(err instanceof Error ? err.message : "internal_auth_error");
+    return NextResponse.redirect(new URL(`/login?error=internal_auth_error&details=${errMessage}`, origin));
   }
 }

@@ -9,13 +9,16 @@ async function main() {
     const cardCount = await prisma.card.count();
     console.log(`📊 Cromos a la base de dades: ${cardCount}`);
 
-    if (cardCount === 0) {
-      console.log("🌱 Base de dades buida. Executant seed inicial automàtic...");
+    const trista = await prisma.album.findUnique({ where: { id: "album-musica-trista" } });
+    const bemparida = await prisma.album.findUnique({ where: { id: "album-musica-bemparida" } });
+
+    if (cardCount === 0 || !trista || !bemparida || cardCount < 200) {
+      console.log("🌱 Base de dades pendent d'actualització d'àlbums. Executant seed automàtic...");
       const { execSync } = require("child_process");
       execSync("npx tsx prisma/seed.ts", { stdio: "inherit" });
       console.log("✅ Seed completat amb èxit!");
     } else {
-      console.log("✅ La base de dades ja té cromos i configuració inicial. No cal fer seed.");
+      console.log("✅ La base de dades ja té tots els àlbums (incloent Música Trista i Música Bemparida).");
     }
 
     // Assegurar que els usuaris principals estan configurats

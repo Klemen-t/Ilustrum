@@ -180,7 +180,7 @@ export default function AlbumPage() {
         case 5: return "Pàgina 5: Targetes Gràfiques & Eines";
         default: return `Pàgina ${page}`;
       }
-    } else {
+    } else if (albumId.includes("m02") || albumId.includes("xarxes")) {
       switch (page) {
         case 1: return "Pàgina 1: GNU/Linux, Bash & Kernel";
         case 2: return "Pàgina 2: Windows Server & Active Directory";
@@ -189,6 +189,26 @@ export default function AlbumPage() {
         case 5: return "Pàgina 5: Serveis de Xarxa & Ciberseguretat";
         default: return `Pàgina ${page}`;
       }
+    } else if (albumId.includes("trista")) {
+      switch (page) {
+        case 1: return "Pàgina 1: Cançons Mítiques & Inicis";
+        case 2: return "Pàgina 2: Discografia & Àlbums";
+        case 3: return "Pàgina 3: Lletres, Nostàlgia & Sentiments";
+        case 4: return "Pàgina 4: Escenaris & Grans Concerts";
+        case 5: return "Pàgina 5: L'Univers Dausà & Simbologia";
+        default: return `Pàgina ${page}`;
+      }
+    } else if (albumId.includes("bemparida")) {
+      switch (page) {
+        case 1: return "Pàgina 1: Rhapsody & Emerald Sword Saga";
+        case 2: return "Pàgina 2: Herois d'Algalord & Membres";
+        case 3: return "Pàgina 3: Armes Màgiques & Encanteris";
+        case 4: return "Pàgina 4: Gegants del Power Metal";
+        case 5: return "Pàgina 5: L'Esperit del Metall Simfònic";
+        default: return `Pàgina ${page}`;
+      }
+    } else {
+      return `Pàgina ${page}`;
     }
   };
 
@@ -199,7 +219,7 @@ export default function AlbumPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
             <BookOpen className="w-7 h-7 text-indigo-400" />
-            <span>Col·lecció d&apos;Àlbums SMIX</span>
+            <span>Col·lecció d&apos;Àlbums</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Gira les pàgines de l&apos;àlbum i enganxa els cromos que has guanyat als reptes!
@@ -208,7 +228,7 @@ export default function AlbumPage() {
 
         {/* Pestañes d'àlbums */}
         {albums.length > 1 && (
-          <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 self-start sm:self-auto">
             {albums.map((a) => (
               <button
                 key={a.id}

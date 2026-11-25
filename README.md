@@ -42,13 +42,21 @@ Distribució probabilística i ponderació d'àlbums:
 ### 5. Supressió del Sistema de Punts
 - S'han eliminat els punts numèrics arbitraris. La progressió i el rànquing es basen purament en el **nombre de cromos únics enganxats a l'àlbum**, el nivell d'experiència (XP) i el percentatge d'encerts.
 
-### 6. Especialitat FP Informàtica IC10 (SMIX)
-- Àlbums de 50 cromos tècnics reals:
-  - **Àlbum 1:** Muntatge i Manteniment d'Equips (M01 Hardware).
-  - **Àlbum 2:** Sistemes Operatius i Xarxes Locals (M02 SOM, M04 SOX i M05 XL).
-- Banc de preguntes tècniques d'arquitectura, comandes Linux, protocols de xarxa (DNS, DHCP, ARP, CIDR, VLANs), shells i serveis.
+### 6. Catàleg d'Àlbums (200 Cromos en 4 Àlbums Temàtics)
+La plataforma compta amb 4 àlbums complets de 50 cromos cadascun (5 pàgines per àlbum en format vertical de 10 caselles):
+- **Àlbum 1: Hardware & Muntatge d'Equips (SMIX M01)** (50 cromos)
+  - Processadors, sòcols Intel/AMD, memòries RAM DDR4/DDR5, unitats SSD NVMe, plaques base, xipsets, refrigeració líquida i eines de taller del tècnic informàtic.
+- **Àlbum 2: Sistemes Operatius & Xarxes Locals (SMIX M02/M05)** (50 cromos)
+  - Comandaments GNU/Linux, Bash, Active Directory, cablejat Cat 6A, fibra òptica, commutadors VLAN, adreçament IPv4/IPv6, protocols TCP/UDP i ciberseguretat.
+- **Àlbum 3: Música Trista (Joan Dausà & Pop d'Autor)** (50 cromos)
+  - Des de la confessió mítica de *'Jo Mai Mai'* i el retorn de *'Judit'*, fins a *'Ara Som Gegants'*, *'Ho Tenim Tot'*, les BSO de *'Barcelona, Nit d'Estiu/Hivern'* i el concert històric al Palau Sant Jordi.
+- **Àlbum 4: Música Bemparida (Rhapsody of Fire & Power Metal)** (50 cromos)
+  - Els himnes immortals de *'Dawn of Victory'* i *'Emerald Sword'*, la saga d'Algalord, Luca Turilli, Fabio Lione, Sir Christopher Lee i els grans gegants del Power Metal mundial (Helloween, Blind Guardian, Stratovarius, DragonForce, Avantasia).
 
-### 7. Importador Senzill de Preguntes per a l'Admin (`/admin`)
+### 7. Banc de Preguntes Educatives i Culturals
+- Més de 70 preguntes reals amb opcions múltiples, explicació pedagògica i temporitzador de 20 segons per posar a prova els coneixements tant de tecnologia i sistemes com de cultura musical i metall èpic.
+
+### 8. Importador Senzill de Preguntes per a l'Admin (`/admin`)
 - Suport per a blocs de text pla intuïtius:
   ```text
   PREGUNTA: Quina comanda de Linux mostra els processos actius en temps real?
@@ -64,7 +72,7 @@ Distribució probabilística i ponderació d'àlbums:
 - Suport per a arxius CSV: `Pregunta;A;B;C;D;Correcta;Mòdul;Explicació`.
 - Descàrrega directa de plantilles d'exemple i validació prèvia (dry-run).
 
-### 8. Disseny 100% Adaptat a Mòbils («Mobile Friendly»)
+### 9. Disseny 100% Adaptat a Mòbils («Mobile Friendly»)
 - Barra de navegació inferior fixa estil aplicació nativa (`safe-area-bottom`) amb accés ràpid a Tauler, Preguntes, Àlbum, Intercanvis i Rànquing.
 - Paginació compacta de l'àlbum i ajustament fluid de formularis.
 

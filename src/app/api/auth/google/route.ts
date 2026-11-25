@@ -16,7 +16,6 @@ export async function GET() {
   }
 
   // Paràmetres d'autorització OAuth2 de Google
-  // hd=lacetania.cat demana a Google filtrar i restringir per defecte al domini corporatiu
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
@@ -24,7 +23,6 @@ export async function GET() {
     scope: "openid email profile",
     access_type: "online",
     prompt: "select_account",
-    hd: domain,
   });
 
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

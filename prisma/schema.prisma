@@ -1,0 +1,439 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================
+// ROLS I USUARIS
+// =====================
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique // "student" | "teacher" | "admin"
+  users User[]
+
+  @@map("roles")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  displayName   String?
+  avatar        String?
+  googleId      String?   @unique
+  roleId        Int       @default(1)
+  role          Role      @relation(fields: [roleId], references: [id])
+  level         Int       @default(1)
+  xp            Int       @default(0)
+  xpToNextLevel Int       @default(100)
+  points        Int       @default(0)
+  totalPoints   Int       @default(0)
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions         Session[]
+  inventory        UserInventory[]
+  questionAttempts QuestionAttempt[]
+  userBadges       UserBadge[]
+  missionProgress  MissionProgress[]
+  tradesProposed   Trade[]           @relation("Proposer")
+  tradesReceived   Trade[]           @relation("Receiver")
+  activityLogs     ActivityLog[]
+  stats            UserStats?
+
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken String   @unique
+  expires      DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([sessionToken])
+  @@index([userId])
+  @@map("sessions")
+}
+
+// =====================
+// RARESES I CATEGORIES
+// =====================
+
+model Rarity {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique // "Comú" | "Poc comú" | "Rar" | "Èpic" | "Llegendari"
+  nameKey     String  @unique // "common" | "uncommon" | "rare" | "epic" | "legendary"
+  probability Float   // Probabilitat d'aparició (ex: 0.60 per comú)
+  colorHex    String
+  glowColor   String  @default("#ffffff")
+  sortOrder   Int     @default(0)
+  cards       Card[]
+
+  @@map("rarities")
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  slug      String     @unique
+  color     String     @default("#6366f1")
+  icon      String?
+  cards     Card[]
+  questions Question[]
+
+  @@map("categories")
+}
+
+model Subject {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  slug      String     @unique
+  color     String     @default("#06b6d4")
+  icon      String?
+  questions Question[]
+
+  @@map("subjects")
+}
+
+// =====================
+// ÀLBUMS I CROMOS
+// =====================
+
+model Album {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  coverImage  String?
+  totalCards  Int         @default(0)
+  sortOrder   Int         @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  cards       Card[]
+  pages       AlbumPage[]
+
+  @@map("albums")
+}
+
+model AlbumPage {
+  id      String @id @default(cuid())
+  albumId String
+  album   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  pageNum Int
+  layout  String @default("grid-3x3")
+  cards   Card[]
+
+  @@unique([albumId, pageNum])
+  @@map("album_pages")
+}
+
+model Card {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  number      Int
+  rarityId    Int
+  rarity      Rarity     @relation(fields: [rarityId], references: [id])
+  categoryId  Int?
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  albumId     String
+  album       Album      @relation(fields: [albumId], references: [id])
+  pageId      String?
+  page        AlbumPage? @relation(fields: [pageId], references: [id])
+  value       Int        @default(10)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  inventory         UserInventory[]
+  tradeOfferItems   TradeOfferItem[]
+  tradeRequestItems TradeRequestItem[]
+
+  @@unique([albumId, number])
+  @@index([rarityId])
+  @@index([albumId])
+  @@map("cards")
+}
+
+// =====================
+// INVENTARI
+// =====================
+
+model UserInventory {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cardId     String
+  card       Card      @relation(fields: [cardId], references: [id])
+  quantity   Int       @default(1)
+  isPasted   Boolean   @default(false)
+  pastedAt   DateTime?
+  obtainedAt DateTime  @default(now())
+  source     String    @default("question") // "question" | "reward" | "trade" | "event" | "pack"
+
+  @@unique([userId, cardId])
+  @@index([userId])
+  @@index([cardId])
+  @@map("user_inventory")
+}
+
+// =====================
+// PREGUNTES I RESPOSTES
+// =====================
+
+model Question {
+  id              String    @id @default(cuid())
+  statement       String
+  categoryId      Int?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  subjectId       Int?
+  subject         Subject?  @relation(fields: [subjectId], references: [id])
+  difficulty      String    @default("medium") // "easy" | "medium" | "hard"
+  explanation     String?
+  points          Int       @default(10)
+  xpReward        Int       @default(15)
+  recommendedTime Int       @default(60)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  answers  Answer[]
+  attempts QuestionAttempt[]
+
+  @@index([difficulty])
+  @@index([subjectId])
+  @@index([categoryId])
+  @@map("questions")
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String
+  isCorrect  Boolean  @default(false)
+  sortOrder  Int      @default(0)
+
+  attempts QuestionAttempt[]
+
+  @@index([questionId])
+  @@map("answers")
+}
+
+model QuestionAttempt {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id])
+  answerId     String?
+  answer       Answer?  @relation(fields: [answerId], references: [id])
+  isCorrect    Boolean
+  pointsEarned Int      @default(0)
+  xpEarned     Int      @default(0)
+  attemptedAt  DateTime @default(now())
+
+  @@index([userId, questionId])
+  @@index([userId])
+  @@map("question_attempts")
+}
+
+// =====================
+// INTERCANVIS
+// =====================
+
+enum TradeStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  EXPIRED
+}
+
+model Trade {
+  id              String      @id @default(cuid())
+  proposerId      String
+  proposer        User        @relation("Proposer", fields: [proposerId], references: [id])
+  receiverId      String?
+  receiver        User?       @relation("Receiver", fields: [receiverId], references: [id])
+  isMarketListing Boolean     @default(true)
+  parentTradeId   String?
+  parentTrade     Trade?      @relation("TradeCounterOffers", fields: [parentTradeId], references: [id], onDelete: Cascade)
+  counterOffers   Trade[]     @relation("TradeCounterOffers")
+  status          TradeStatus @default(PENDING)
+  message         String?
+  expiresAt       DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  offerItems   TradeOfferItem[]
+  requestItems TradeRequestItem[]
+  history      TradeHistory[]
+
+  @@index([proposerId])
+  @@index([receiverId])
+  @@index([status])
+  @@index([isMarketListing])
+  @@map("trades")
+}
+
+model TradeOfferItem {
+  id       String @id @default(cuid())
+  tradeId  String
+  trade    Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  cardId   String
+  card     Card   @relation(fields: [cardId], references: [id])
+  quantity Int    @default(1)
+
+  @@map("trade_offer_items")
+}
+
+model TradeRequestItem {
+  id       String @id @default(cuid())
+  tradeId  String
+  trade    Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  cardId   String
+  card     Card   @relation(fields: [cardId], references: [id])
+  quantity Int    @default(1)
+
+  @@map("trade_request_items")
+}
+
+model TradeHistory {
+  id        String   @id @default(cuid())
+  tradeId   String
+  trade     Trade    @relation(fields: [tradeId], references: [id])
+  action    String
+  actorId   String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@map("trade_history")
+}
+
+// =====================
+// GAMIFICACIÓ
+// =====================
+
+model Badge {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  description String
+  imageUrl    String?
+  condition   String      // JSON amb regles d'obtenció
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  userBadges  UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId  String
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Mission {
+  id           String   @id @default(cuid())
+  name         String
+  description  String
+  type         String   @default("permanent") // "daily" | "weekly" | "permanent"
+  condition    String   // JSON amb regles
+  rewardPoints Int      @default(0)
+  rewardXp     Int      @default(0)
+  rewardCardId String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  progress MissionProgress[]
+
+  @@map("missions")
+}
+
+model MissionProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  missionId   String
+  mission     Mission   @relation(fields: [missionId], references: [id])
+  progress    Int       @default(0)
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  resetAt     DateTime?
+
+  @@unique([userId, missionId])
+  @@map("mission_progress")
+}
+
+// =====================
+// ESTADÍSTIQUES
+// =====================
+
+model UserStats {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalAnswers     Int       @default(0)
+  correctAnswers   Int       @default(0)
+  totalCards       Int       @default(0)
+  uniqueCards      Int       @default(0)
+  pastedCards      Int       @default(0)
+  tradesCompleted  Int       @default(0)
+  streakDays       Int       @default(0)
+  lastActivityDate DateTime?
+  updatedAt        DateTime  @updatedAt
+
+  @@map("user_stats")
+}
+
+// =====================
+// CONFIGURACIÓ I LOGS
+// =====================
+
+model AppConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@map("app_config")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("activity_logs")
+}

@@ -1,11 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findOrCreateUser, createSessionToken, setSessionCookie, isAllowedDomain } from "@/lib/auth";
 
+function getAppBaseUrl(request: NextRequest): string {
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+
+  if (host.includes("vercel.app") && host.includes("ilustrum")) {
+    return "https://ilustrum.vercel.app";
+  }
+  if (host) {
+    return `${proto}://${host}`.replace(/\/$/, "");
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("infla.cat")) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  return request.nextUrl.origin.replace(/\/$/, "");
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
-  const origin = (process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin).replace(/\/$/, "");
+  const origin = getAppBaseUrl(request);
 
   if (error || !code) {
     return NextResponse.redirect(new URL(`/login?error=oauth_cancelled`, origin));

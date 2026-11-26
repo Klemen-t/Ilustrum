@@ -57,6 +57,16 @@ interface CardWon {
   quantityTotal: number;
 }
 
+interface AlbumInfo {
+  id: string;
+  name: string;
+  description?: string;
+  totalCards?: number;
+  ownedCount?: number;
+  completionPercentage?: number;
+  isEnrolled?: boolean;
+}
+
 interface DailyStatus {
   dailyLimit: number;
   attemptsToday: number;
@@ -86,7 +96,8 @@ export default function QuestionsPage() {
   const [question, setQuestion] = useState<Question | null>(null);
   const [dailyStatus, setDailyStatus] = useState<DailyStatus | null>(null);
   const [dailyLimitReached, setDailyLimitReached] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingAlbums, setLoadingAlbums] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -95,14 +106,15 @@ export default function QuestionsPage() {
   const [timerActive, setTimerActive] = useState<boolean>(false);
   const [showCardModal, setShowCardModal] = useState(false);
 
-  // Gestió d'àlbums i participació
-  const [userAlbums, setUserAlbums] = useState<{ id: string; name: string; isEnrolled?: boolean }[]>([]);
-  const [selectedAlbumFilter, setSelectedAlbumFilter] = useState<string>("all");
+  // Gestió d'àlbums i selecció obligatòria
+  const [userAlbums, setUserAlbums] = useState<AlbumInfo[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<AlbumInfo | null>(null);
   const [noEnrollments, setNoEnrollments] = useState(false);
   const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
   // Carregar llista d'àlbums
   const loadAlbums = useCallback(async () => {
+    setLoadingAlbums(true);
     try {
       const res = await fetch("/api/album");
       const data = await res.json();
@@ -111,6 +123,8 @@ export default function QuestionsPage() {
       }
     } catch (e) {
       console.error("Error carregant àlbums:", e);
+    } finally {
+      setLoadingAlbums(false);
     }
   }, []);
 
@@ -118,8 +132,11 @@ export default function QuestionsPage() {
     loadAlbums();
   }, [loadAlbums]);
 
-  // Carregar una pregunta nova
+  // Carregar una pregunta nova per a l'àlbum triat
   const fetchNewQuestion = useCallback(async (albumIdOverride?: string) => {
+    const targetAlbumId = albumIdOverride || selectedAlbum?.id;
+    if (!targetAlbumId) return;
+
     setLoading(true);
     setError(null);
     setSelectedAnswerId(null);
@@ -127,11 +144,7 @@ export default function QuestionsPage() {
     setShowCardModal(false);
     setNoEnrollments(false);
 
-    const albumParam = albumIdOverride !== undefined
-      ? albumIdOverride
-      : (selectedAlbumFilter !== "all" ? selectedAlbumFilter : "");
-
-    const url = albumParam ? `/api/questions/random?albumId=${albumParam}` : "/api/questions/random";
+    const url = `/api/questions/random?albumId=${encodeURIComponent(targetAlbumId)}`;
 
     try {
       const res = await fetch(url);
@@ -153,7 +166,7 @@ export default function QuestionsPage() {
       }
 
       if (!res.ok) {
-        setError(data.error || "No s'ha pogut carregar cap pregunta.");
+        setError(data.error || "No s'ha pogut carregar cap pregunta per a aquest àlbum.");
         setQuestion(null);
         setLoading(false);
         return;
@@ -168,11 +181,38 @@ export default function QuestionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedAlbumFilter]);
+  }, [selectedAlbum]);
 
-  useEffect(() => {
-    fetchNewQuestion();
-  }, [fetchNewQuestion]);
+  // Triar un àlbum per respondre preguntes
+  const handleSelectAlbum = async (album: AlbumInfo) => {
+    setSelectedAlbum(album);
+    // Si l'usuari encara no estava inscrit, l'inscrivim automàticament
+    if (!album.isEnrolled) {
+      try {
+        await fetch("/api/album/enroll", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ albumId: album.id }),
+        });
+        setUserAlbums((prev) =>
+          prev.map((a) => (a.id === album.id ? { ...a, isEnrolled: true } : a))
+        );
+      } catch (e) {
+        console.error("Error auto-inscrivint:", e);
+      }
+    }
+    fetchNewQuestion(album.id);
+  };
+
+  // Tornar a la pantalla de triar àlbum
+  const handleBackToAlbumPicker = () => {
+    setSelectedAlbum(null);
+    setQuestion(null);
+    setResult(null);
+    setError(null);
+    setTimerActive(false);
+    loadAlbums();
+  };
 
   // Commutar participació en un àlbum des de la pantalla de preguntes
   const handleToggleEnrollment = async (albumId: string) => {
@@ -355,136 +395,174 @@ export default function QuestionsPage() {
         </div>
       </div>
 
-      {/* Selector / Filtre d'Àlbums per a les preguntes */}
-      {userAlbums.length > 0 && (
-        <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2.5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
-            <span className="font-bold text-slate-300 flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4 text-indigo-400" />
-              <span>Àlbums en què participes:</span>
-            </span>
-            <span className="text-[11px] text-slate-400">
-              Les preguntes i els cromos només seran dels àlbums que tinguis activats
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedAlbumFilter("all");
-                fetchNewQuestion("");
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                selectedAlbumFilter === "all"
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                  : "bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60"
-              }`}
-            >
-              <span>🎲 Tots els meus àlbums</span>
-            </button>
-
-            {userAlbums.map((a) => {
-              const isEnrolled = !!a.isEnrolled;
-              const isSelected = selectedAlbumFilter === a.id;
-
-              return (
-                <div key={a.id} className="flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!isEnrolled) {
-                        handleToggleEnrollment(a.id);
-                      } else {
-                        setSelectedAlbumFilter(a.id);
-                        fetchNewQuestion(a.id);
-                      }
-                    }}
-                    className={`px-3 py-1.5 rounded-l-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
-                      isSelected
-                        ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30"
-                        : isEnrolled
-                        ? "bg-slate-800/80 text-slate-300 border-slate-700 hover:text-white"
-                        : "bg-slate-950/60 text-slate-500 border-slate-800/80 line-through hover:text-slate-300"
-                    }`}
-                    title={isEnrolled ? `Filtra preguntes de ${a.name}` : `Inscriu-te a ${a.name}`}
-                  >
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        isEnrolled ? "bg-emerald-400 animate-pulse" : "bg-slate-600"
-                      }`}
-                    />
-                    <span>{a.name.split("(")[0].trim()}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleToggleEnrollment(a.id)}
-                    disabled={enrollingId === a.id}
-                    className={`px-2 py-1.5 rounded-r-xl border-y border-r text-[10px] font-bold transition-colors ${
-                      isEnrolled
-                        ? "bg-slate-800 border-slate-700 text-slate-400 hover:bg-rose-950/40 hover:text-rose-300 hover:border-rose-800"
-                        : "bg-emerald-950/40 border-emerald-800 text-emerald-300 hover:bg-emerald-900/60"
-                    }`}
-                    title={isEnrolled ? "Pausar participació" : "Activar participació"}
-                  >
-                    {enrollingId === a.id ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : isEnrolled ? (
-                      "Pausar"
-                    ) : (
-                      "Activar"
-                    )}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Estat sense àlbums inscrits */}
-      {!loading && noEnrollments && (
-        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-amber-950/30 via-slate-900 to-slate-950 border border-amber-500/40 text-center space-y-6 shadow-2xl">
-          <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl">
-            ⏸️
-          </div>
-
-          <div className="space-y-2">
-            <h2 className="text-xl sm:text-2xl font-black text-white">
-              No estàs participant en cap àlbum!
+      {/* PANTALLA 1: SELECCIÓ D'ÀLBUM OBLIGATÒRIA (quan selectedAlbum === null) */}
+      {!selectedAlbum && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-center space-y-3 shadow-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Pas 1: Tria la teva aventura</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              De quin àlbum vols respondre preguntes?
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
-              Per rebre preguntes i començar a col·leccionar cromos, has d&apos;escollir com a mínim un àlbum en què vulguis participar.
-              Pots activar o pausar àlbums quan vulguis!
+            <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto">
+              Totes les preguntes que contestis i els sobres de cromos que guanyis seran exclusivament de l&apos;àlbum que triïs.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
-            {userAlbums.map((a) => (
-              <div
-                key={a.id}
-                className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3 shadow-md"
-              >
-                <div>
-                  <div className="font-bold text-white text-xs sm:text-sm">
-                    {a.name.split("(")[0].trim()}
+          {loadingAlbums && (
+            <div className="p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+              <p className="text-sm font-medium text-slate-400">Carregant els àlbums disponibles...</p>
+            </div>
+          )}
+
+          {!loadingAlbums && userAlbums.length === 0 && (
+            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-2">
+              <p className="text-sm text-slate-400">No s&apos;ha trobat cap àlbum disponible actualment.</p>
+            </div>
+          )}
+
+          {!loadingAlbums && userAlbums.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {userAlbums.map((album) => {
+                const isMusicTrista = album.id.includes("musica-trista");
+                const isMusicPower = album.id.includes("musica-bemparida");
+                const isHardware = album.id.includes("hardware");
+                const isSistemes = album.id.includes("sistemes");
+
+                let icon = "📚";
+                let badgeColor = "bg-indigo-500/10 border-indigo-500/30 text-indigo-300";
+                let gradient = "from-indigo-950/40 to-slate-900";
+
+                if (isMusicTrista) {
+                  icon = "🎵";
+                  badgeColor = "bg-blue-500/10 border-blue-500/30 text-blue-300";
+                  gradient = "from-blue-950/40 to-slate-900";
+                } else if (isMusicPower) {
+                  icon = "⚡";
+                  badgeColor = "bg-amber-500/10 border-amber-500/30 text-amber-300";
+                  gradient = "from-amber-950/40 to-slate-900";
+                } else if (isHardware) {
+                  icon = "🖥️";
+                  badgeColor = "bg-cyan-500/10 border-cyan-500/30 text-cyan-300";
+                  gradient = "from-cyan-950/40 to-slate-900";
+                } else if (isSistemes) {
+                  icon = "🌐";
+                  badgeColor = "bg-emerald-500/10 border-emerald-500/30 text-emerald-300";
+                  gradient = "from-emerald-950/40 to-slate-900";
+                }
+
+                return (
+                  <div
+                    key={album.id}
+                    className={`p-6 rounded-3xl bg-gradient-to-b ${gradient} border border-slate-800 hover:border-indigo-500/60 transition-all flex flex-col justify-between space-y-4 shadow-xl hover:shadow-2xl group`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                          {icon}
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-black border ${badgeColor}`}>
+                          {album.totalCards || 50} cromos
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-black text-white group-hover:text-indigo-300 transition-colors">
+                          {album.name}
+                        </h3>
+                        {album.description && (
+                          <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                            {album.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {album.completionPercentage !== undefined && (
+                        <div className="space-y-1 pt-1">
+                          <div className="flex justify-between text-[11px] text-slate-400">
+                            <span>Completat:</span>
+                            <span className="font-bold text-white">{album.completionPercentage}%</span>
+                          </div>
+                          <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                            <div
+                              className="bg-indigo-500 h-full rounded-full transition-all duration-500"
+                              style={{ width: `${album.completionPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectAlbum(album)}
+                      className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] cursor-pointer"
+                    >
+                      <span>Respondre preguntes d&apos;aquest àlbum</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div className="text-[11px] text-slate-400">50 cromos disponibles</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleToggleEnrollment(a.id)}
-                  disabled={enrollingId === a.id}
-                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all whitespace-nowrap"
-                >
-                  {enrollingId === a.id ? "Activant..." : "Participar"}
-                </button>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
+
+      {/* PANTALLA 2: JOC DE PREGUNTES (quan selectedAlbum !== null) */}
+      {selectedAlbum && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Banner indicador de l'àlbum triat i botó per canviar */}
+          <div className="p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-xl">
+                📖
+              </div>
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+                  Àlbum seleccionat
+                </div>
+                <div className="font-extrabold text-white text-sm sm:text-base">
+                  {selectedAlbum.name}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleBackToAlbumPicker}
+              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 hover:text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
+            >
+              <span>🔄 Canviar d&apos;àlbum</span>
+            </button>
+          </div>
+
+          {/* Estat sense àlbums inscrits */}
+          {!loading && noEnrollments && (
+            <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-amber-950/30 via-slate-900 to-slate-950 border border-amber-500/40 text-center space-y-6 shadow-2xl">
+              <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl">
+                ⏸️
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  No estàs participant en aquest àlbum!
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+                  Per rebre preguntes i començar a col·leccionar cromos, has d&apos;activar la participació.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleSelectAlbum(selectedAlbum)}
+                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs"
+              >
+                Activar participació i començar
+              </button>
+            </div>
+          )}
 
       {/* Estat de límit diari assolit */}
       {!loading && dailyLimitReached && (
@@ -918,6 +996,8 @@ export default function QuestionsPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
         </div>
       )}
     </div>

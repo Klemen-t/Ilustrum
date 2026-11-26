@@ -541,7 +541,7 @@ export default function QuestionsPage() {
           <p className="text-sm text-rose-200">{error}</p>
           <button
             type="button"
-            onClick={fetchNewQuestion}
+            onClick={() => fetchNewQuestion()}
             className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs"
           >
             Tornar a provar
@@ -692,7 +692,7 @@ export default function QuestionsPage() {
               <div className="pt-2">
                 <button
                   type="button"
-                  onClick={fetchNewQuestion}
+                  onClick={() => fetchNewQuestion()}
                   className="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/30 flex items-center gap-2 mx-auto transition-transform active:scale-95 cursor-pointer"
                 >
                   <span>Següent Pregunta</span>
@@ -805,7 +805,7 @@ export default function QuestionsPage() {
 
                 <button
                   type="button"
-                  onClick={fetchNewQuestion}
+                  onClick={() => fetchNewQuestion()}
                   className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md flex items-center gap-2 transition-transform active:scale-[0.98] cursor-pointer"
                 >
                   <span>Següent Pregunta</span>

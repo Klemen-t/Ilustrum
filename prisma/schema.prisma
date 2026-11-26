@@ -50,6 +50,7 @@ model User {
   tradesReceived   Trade[]           @relation("Receiver")
   activityLogs     ActivityLog[]
   stats            UserStats?
+  albumEnrollments UserAlbumEnrollment[]
 
   @@index([email])
   @@map("users")
@@ -122,8 +123,10 @@ model Album {
   isActive    Boolean     @default(true)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  cards       Card[]
-  pages       AlbumPage[]
+  cards           Card[]
+  pages           AlbumPage[]
+  questions       Question[]
+  userEnrollments UserAlbumEnrollment[]
 
   @@map("albums")
 }
@@ -202,6 +205,8 @@ model Question {
   category        Category? @relation(fields: [categoryId], references: [id])
   subjectId       Int?
   subject         Subject?  @relation(fields: [subjectId], references: [id])
+  albumId         String?
+  album           Album?    @relation(fields: [albumId], references: [id], onDelete: SetNull)
   difficulty      String    @default("medium") // "easy" | "medium" | "hard"
   explanation     String?
   points          Int       @default(10)
@@ -217,7 +222,24 @@ model Question {
   @@index([difficulty])
   @@index([subjectId])
   @@index([categoryId])
+  @@index([albumId])
   @@map("questions")
+}
+
+model UserAlbumEnrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, albumId])
+  @@index([userId])
+  @@index([albumId])
+  @@map("user_album_enrollments")
 }
 
 model Answer {

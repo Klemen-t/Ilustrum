@@ -32,6 +32,7 @@ interface Question {
   recommendedTime: number;
   category: { id: number; name: string; color: string; icon: string | null } | null;
   subject: { id: number; name: string; color: string } | null;
+  album?: { id: string; name: string } | null;
   answers: Answer[];
 }
 
@@ -94,17 +95,55 @@ export default function QuestionsPage() {
   const [timerActive, setTimerActive] = useState<boolean>(false);
   const [showCardModal, setShowCardModal] = useState(false);
 
+  // Gestió d'àlbums i participació
+  const [userAlbums, setUserAlbums] = useState<{ id: string; name: string; isEnrolled?: boolean }[]>([]);
+  const [selectedAlbumFilter, setSelectedAlbumFilter] = useState<string>("all");
+  const [noEnrollments, setNoEnrollments] = useState(false);
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
+
+  // Carregar llista d'àlbums
+  const loadAlbums = useCallback(async () => {
+    try {
+      const res = await fetch("/api/album");
+      const data = await res.json();
+      if (res.ok && data.albums) {
+        setUserAlbums(data.albums);
+      }
+    } catch (e) {
+      console.error("Error carregant àlbums:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAlbums();
+  }, [loadAlbums]);
+
   // Carregar una pregunta nova
-  const fetchNewQuestion = useCallback(async () => {
+  const fetchNewQuestion = useCallback(async (albumIdOverride?: string) => {
     setLoading(true);
     setError(null);
     setSelectedAnswerId(null);
     setResult(null);
     setShowCardModal(false);
+    setNoEnrollments(false);
+
+    const albumParam = albumIdOverride !== undefined
+      ? albumIdOverride
+      : (selectedAlbumFilter !== "all" ? selectedAlbumFilter : "");
+
+    const url = albumParam ? `/api/questions/random?albumId=${albumParam}` : "/api/questions/random";
 
     try {
-      const res = await fetch("/api/questions/random");
+      const res = await fetch(url);
       const data = await res.json();
+
+      if (data.noEnrollments) {
+        setNoEnrollments(true);
+        if (data.dailyStatus) setDailyStatus(data.dailyStatus);
+        setQuestion(null);
+        setLoading(false);
+        return;
+      }
 
       if (res.status === 429 || data.dailyLimitReached) {
         setDailyLimitReached(true);
@@ -115,6 +154,7 @@ export default function QuestionsPage() {
 
       if (!res.ok) {
         setError(data.error || "No s'ha pogut carregar cap pregunta.");
+        setQuestion(null);
         setLoading(false);
         return;
       }
@@ -128,11 +168,35 @@ export default function QuestionsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedAlbumFilter]);
 
   useEffect(() => {
     fetchNewQuestion();
   }, [fetchNewQuestion]);
+
+  // Commutar participació en un àlbum des de la pantalla de preguntes
+  const handleToggleEnrollment = async (albumId: string) => {
+    setEnrollingId(albumId);
+    try {
+      const res = await fetch("/api/album/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ albumId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUserAlbums((prev) =>
+          prev.map((a) => (a.id === albumId ? { ...a, isEnrolled: data.isEnrolled } : a))
+        );
+        // Recarregar preguntes
+        fetchNewQuestion();
+      }
+    } catch (e) {
+      console.error("Error canviant inscripció:", e);
+    } finally {
+      setEnrollingId(null);
+    }
+  };
 
   // Gestió del temporitzador (20 segons)
   useEffect(() => {
@@ -291,6 +355,137 @@ export default function QuestionsPage() {
         </div>
       </div>
 
+      {/* Selector / Filtre d'Àlbums per a les preguntes */}
+      {userAlbums.length > 0 && (
+        <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4 text-indigo-400" />
+              <span>Àlbums en què participes:</span>
+            </span>
+            <span className="text-[11px] text-slate-400">
+              Les preguntes i els cromos només seran dels àlbums que tinguis activats
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedAlbumFilter("all");
+                fetchNewQuestion("");
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                selectedAlbumFilter === "all"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                  : "bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60"
+              }`}
+            >
+              <span>🎲 Tots els meus àlbums</span>
+            </button>
+
+            {userAlbums.map((a) => {
+              const isEnrolled = !!a.isEnrolled;
+              const isSelected = selectedAlbumFilter === a.id;
+
+              return (
+                <div key={a.id} className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isEnrolled) {
+                        handleToggleEnrollment(a.id);
+                      } else {
+                        setSelectedAlbumFilter(a.id);
+                        fetchNewQuestion(a.id);
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-l-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                      isSelected
+                        ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30"
+                        : isEnrolled
+                        ? "bg-slate-800/80 text-slate-300 border-slate-700 hover:text-white"
+                        : "bg-slate-950/60 text-slate-500 border-slate-800/80 line-through hover:text-slate-300"
+                    }`}
+                    title={isEnrolled ? `Filtra preguntes de ${a.name}` : `Inscriu-te a ${a.name}`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        isEnrolled ? "bg-emerald-400 animate-pulse" : "bg-slate-600"
+                      }`}
+                    />
+                    <span>{a.name.split("(")[0].trim()}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleEnrollment(a.id)}
+                    disabled={enrollingId === a.id}
+                    className={`px-2 py-1.5 rounded-r-xl border-y border-r text-[10px] font-bold transition-colors ${
+                      isEnrolled
+                        ? "bg-slate-800 border-slate-700 text-slate-400 hover:bg-rose-950/40 hover:text-rose-300 hover:border-rose-800"
+                        : "bg-emerald-950/40 border-emerald-800 text-emerald-300 hover:bg-emerald-900/60"
+                    }`}
+                    title={isEnrolled ? "Pausar participació" : "Activar participació"}
+                  >
+                    {enrollingId === a.id ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : isEnrolled ? (
+                      "Pausar"
+                    ) : (
+                      "Activar"
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Estat sense àlbums inscrits */}
+      {!loading && noEnrollments && (
+        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-amber-950/30 via-slate-900 to-slate-950 border border-amber-500/40 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl">
+            ⏸️
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-xl sm:text-2xl font-black text-white">
+              No estàs participant en cap àlbum!
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+              Per rebre preguntes i començar a col·leccionar cromos, has d&apos;escollir com a mínim un àlbum en què vulguis participar.
+              Pots activar o pausar àlbums quan vulguis!
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
+            {userAlbums.map((a) => (
+              <div
+                key={a.id}
+                className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3 shadow-md"
+              >
+                <div>
+                  <div className="font-bold text-white text-xs sm:text-sm">
+                    {a.name.split("(")[0].trim()}
+                  </div>
+                  <div className="text-[11px] text-slate-400">50 cromos disponibles</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleToggleEnrollment(a.id)}
+                  disabled={enrollingId === a.id}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all whitespace-nowrap"
+                >
+                  {enrollingId === a.id ? "Activant..." : "Participar"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Estat de límit diari assolit */}
       {!loading && dailyLimitReached && (
         <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-indigo-950/40 via-slate-900 to-slate-950 border border-indigo-500/30 text-center space-y-6 shadow-2xl">
@@ -368,6 +563,13 @@ export default function QuestionsPage() {
           {/* Metadades, Sobres Tancats & Temporitzador */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
             <div className="flex items-center gap-2 flex-wrap">
+              {question.album && (
+                <span className="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-indigo-500/15 border border-indigo-500/40 text-indigo-300 flex items-center gap-1.5 shadow-sm">
+                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Àlbum: {question.album.name.split("(")[0].trim()}</span>
+                </span>
+              )}
+
               {question.subject && (
                 <span
                   className="px-2.5 py-1 rounded-xl text-xs font-bold border"

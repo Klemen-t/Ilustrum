@@ -1767,9 +1767,21 @@ async function main() {
   // INICIALITZACIÓ SEGURA DE TOTES LES PREGUNTES
   // ========================================================
   const allQuestions = [
-    ...questionsSMIX,
-    ...questionsJoanDausa,
-    ...questionsRhapsodyPowerMetal,
+    ...questionsSMIX.map((q) => ({
+      ...q,
+      albumId:
+        q.subjectSlug === "smix-m01-mme" || q.categorySlug === "hardware"
+          ? "album-smix-m01-hardware"
+          : "album-smix-m02-m05-xarxes",
+    })),
+    ...questionsJoanDausa.map((q) => ({
+      ...q,
+      albumId: "album-musica-trista",
+    })),
+    ...questionsRhapsodyPowerMetal.map((q) => ({
+      ...q,
+      albumId: "album-musica-bemparida",
+    })),
   ];
 
   for (const q of allQuestions) {
@@ -1791,6 +1803,7 @@ async function main() {
           recommendedTime: 20, // 20 segons per respondre!
           subjectId: subject ? subject.id : null,
           categoryId: category ? category.id : null,
+          albumId: q.albumId,
           isActive: true,
         },
       });
@@ -1806,9 +1819,17 @@ async function main() {
           },
         });
       }
+    } else {
+      // Actualitzar l'albumId a les preguntes existents si no en tenien
+      await prisma.question.update({
+        where: { id: existing.id },
+        data: {
+          albumId: q.albumId,
+        },
+      });
     }
   }
-  console.log("✅ Banc de preguntes complet inicialitzat (SMIX + Joan Dausà + Rhapsody & Power Metal):", allQuestions.length);
+  console.log("✅ Banc de preguntes complet inicialitzat amb àlbum assignat:", allQuestions.length);
 
   // 9. Insígnies del sistema
   const badgesData = [
@@ -1826,6 +1847,24 @@ async function main() {
     });
   }
   console.log("✅ Insígnies inicialitzades!");
+
+  // 10. Inscripcions inicials d'usuaris als àlbums
+  const allDbAlbums = await prisma.album.findMany({ where: { isActive: true } });
+  const allDbUsers = await prisma.user.findMany();
+  for (const u of allDbUsers) {
+    for (const a of allDbAlbums) {
+      await prisma.userAlbumEnrollment.upsert({
+        where: { userId_albumId: { userId: u.id, albumId: a.id } },
+        update: {},
+        create: {
+          userId: u.id,
+          albumId: a.id,
+          isActive: true,
+        },
+      });
+    }
+  }
+  console.log("✅ Inscripcions inicials d'àlbums sincronitzades!");
 
   console.log("🎉 Seed SMIX completat amb èxit!");
 }

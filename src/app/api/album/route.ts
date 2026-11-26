@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getUserEnrolledAlbumIds } from "@/services/album.service";
 
 export async function GET(request: NextRequest) {
   const session = await getSession();
@@ -29,13 +30,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No hi ha cap àlbum actiu." }, { status: 404 });
     }
 
-    // 2. Inventari de l'usuari
-    const userInventory = await prisma.userInventory.findMany({
-      where: { userId: session.userId },
-    });
+    // 2. Inventari i inscripcions de l'usuari
+    const [userInventory, enrolledAlbumIds] = await Promise.all([
+      prisma.userInventory.findMany({
+        where: { userId: session.userId },
+      }),
+      getUserEnrolledAlbumIds(session.userId),
+    ]);
     const inventoryMap = new Map(userInventory.map((item) => [item.cardId, item]));
+    const enrolledSet = new Set(enrolledAlbumIds);
 
-    // 3. Crear llista d'àlbums amb estadístiques per al selector
+    // 3. Crear llista d'àlbums amb estadístiques i estat d'inscripció
     const albumsList = allAlbums.map((a) => {
       const totalCards = a.cards.length;
       const owned = a.cards.filter((c) => inventoryMap.has(c.id)).length;
@@ -46,6 +51,7 @@ export async function GET(request: NextRequest) {
         totalCards,
         ownedCount: owned,
         completionPercentage: totalCards > 0 ? Math.round((owned / totalCards) * 100) : 0,
+        isEnrolled: enrolledSet.has(a.id),
       };
     });
 
@@ -141,6 +147,7 @@ export async function GET(request: NextRequest) {
         pages: album.pages,
         cards: albumCards,
         unpastedCards,
+        isEnrolled: enrolledSet.has(album.id),
       },
     });
   } catch (error: unknown) {

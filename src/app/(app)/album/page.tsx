@@ -62,6 +62,7 @@ interface AlbumDetail {
   pages: AlbumPageItem[];
   cards: AlbumCard[];
   unpastedCards: AlbumCard[];
+  isEnrolled?: boolean;
 }
 
 interface AlbumSummary {
@@ -71,6 +72,7 @@ interface AlbumSummary {
   totalCards: number;
   ownedCount: number;
   completionPercentage: number;
+  isEnrolled?: boolean;
 }
 
 const CARDS_PER_PAGE = 10;
@@ -86,6 +88,7 @@ export default function AlbumPage() {
   const [pastingCardId, setPastingCardId] = useState<string | null>(null);
   const [justPastedCardId, setJustPastedCardId] = useState<string | null>(null);
   const [draggedCardId, setDraggedCardId] = useState<string | null>(null);
+  const [togglingEnrollment, setTogglingEnrollment] = useState(false);
 
   // Carregar dades de l'àlbum
   const loadAlbumData = useCallback(async (albumId?: string) => {
@@ -142,6 +145,29 @@ export default function AlbumPage() {
       alert("Error de connexió en enganxar el cromo.");
     } finally {
       setPastingCardId(null);
+    }
+  };
+
+  // Commutar la participació en l'àlbum
+  const handleToggleEnrollment = async (albumId: string) => {
+    setTogglingEnrollment(true);
+    try {
+      const res = await fetch("/api/album/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ albumId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAlbum((prev) => (prev ? { ...prev, isEnrolled: data.isEnrolled } : null));
+        setAlbums((prev) =>
+          prev.map((a) => (a.id === albumId ? { ...a, isEnrolled: data.isEnrolled } : a))
+        );
+      }
+    } catch {
+      alert("Error de connexió en canviar la participació.");
+    } finally {
+      setTogglingEnrollment(false);
     }
   };
 
@@ -238,14 +264,20 @@ export default function AlbumPage() {
                   setCurrentPage(1);
                   loadAlbumData(a.id);
                 }}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                   selectedAlbumId === a.id
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
                     : "text-slate-400 hover:text-white"
                 }`}
+                title={a.isEnrolled ? "Àlbum actiu (reps preguntes d'aquest àlbum)" : "Àlbum pausat"}
               >
-                {a.name.split("(")[0].trim()}
-                <span className="ml-1.5 text-[10px] opacity-80 font-mono">
+                <span
+                  className={`w-2 h-2 rounded-full inline-block ${
+                    a.isEnrolled ? "bg-emerald-400" : "bg-slate-500 opacity-60"
+                  }`}
+                />
+                <span>{a.name.split("(")[0].trim()}</span>
+                <span className="text-[10px] opacity-80 font-mono">
                   {a.completionPercentage}%
                 </span>
               </button>
@@ -364,19 +396,74 @@ export default function AlbumPage() {
                   </h2>
                 </div>
 
-                {/* Progrés de la col·lecció */}
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Completat</span>
-                    <span className="text-sm font-black text-white font-mono">
-                      {album.pastedCount} / {album.totalCards} ({album.completionPercentage}%)
+                {/* Estat de participació & Progrés */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleEnrollment(album.id)}
+                    disabled={togglingEnrollment}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border shadow-sm ${
+                      album.isEnrolled
+                        ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25"
+                        : "bg-slate-800/90 border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white"
+                    }`}
+                    title={
+                      album.isEnrolled
+                        ? "Fes clic per deixar de participar en aquest àlbum"
+                        : "Fes clic per començar a participar en aquest àlbum"
+                    }
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        album.isEnrolled ? "bg-emerald-400 animate-pulse" : "bg-slate-500"
+                      }`}
+                    />
+                    <span>
+                      {album.isEnrolled ? "Participes en aquest àlbum" : "No hi participes"}
                     </span>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-mono font-black text-indigo-300 text-sm">
-                    {album.completionPercentage}%
+                    <span className="text-[10px] opacity-75 underline ml-0.5">
+                      {album.isEnrolled ? "(Pausar)" : "(Activar)"}
+                    </span>
+                  </button>
+
+                  <div className="flex items-center gap-2.5">
+                    <div className="text-right">
+                      <span className="text-xs text-slate-400 block">Completat</span>
+                      <span className="text-sm font-black text-white font-mono">
+                        {album.pastedCount} / {album.totalCards} ({album.completionPercentage}%)
+                      </span>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-mono font-black text-indigo-300 text-sm">
+                      {album.completionPercentage}%
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Avís si no participa en aquest àlbum */}
+              {!album.isEnrolled && (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">⏸️</span>
+                    <div>
+                      <span className="font-bold block text-amber-300">
+                        No estàs participant en aquest àlbum
+                      </span>
+                      <span className="text-slate-300">
+                        No rebràs preguntes d&apos;aquesta temàtica ni en guanyaràs cromos fins que activis la teva participació.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleEnrollment(album.id)}
+                    disabled={togglingEnrollment}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs whitespace-nowrap self-start sm:self-auto transition-colors shadow-sm"
+                  >
+                    Vull participar-hi!
+                  </button>
+                </div>
+              )}
 
               {/* GRAELLA DE CROMOS DE LA PÀGINA EN FORMAT VERTICAL (2 columnes a mòbil, 2 o 5 a tauleta) */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 sm:gap-4 my-auto">

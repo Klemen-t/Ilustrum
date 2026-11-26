@@ -56,7 +56,12 @@ La plataforma compta amb 4 àlbums complets de 50 cromos cadascun (5 pàgines pe
 ### 7. Banc de Preguntes Educatives i Culturals
 - Més de 70 preguntes reals amb opcions múltiples, explicació pedagògica i temporitzador de 20 segons per posar a prova els coneixements tant de tecnologia i sistemes com de cultura musical i metall èpic.
 
-### 8. Importador Senzill de Preguntes per a l'Admin (`/admin`)
+### 8. Elecció de Participació en Àlbums i Preguntes Exclusives
+- **Inscripció voluntària:** Els alumnes poden decidir en quins àlbums participen i en quins no des de la pàgina de l'àlbum (`/album`) o des de la capçalera de preguntes (`/questions`).
+- **Preguntes i cromos filtrats:** Les preguntes només surten dels àlbums actius de l'alumne. Mai no li sortiran preguntes ni rebrà cromos d'àlbums en què no participi.
+- **Filtració flexible:** A la pantalla de preguntes, l'alumne pot triar respondre sobre tots els seus àlbums actius alhora o enfocar-se en un àlbum concret.
+
+### 9. Importador Senzill de Preguntes per a l'Admin (`/admin`)
 - Suport per a blocs de text pla intuïtius:
   ```text
   PREGUNTA: Quina comanda de Linux mostra els processos actius en temps real?
@@ -72,7 +77,7 @@ La plataforma compta amb 4 àlbums complets de 50 cromos cadascun (5 pàgines pe
 - Suport per a arxius CSV: `Pregunta;A;B;C;D;Correcta;Mòdul;Explicació`.
 - Descàrrega directa de plantilles d'exemple i validació prèvia (dry-run).
 
-### 9. Disseny 100% Adaptat a Mòbils («Mobile Friendly»)
+### 10. Disseny 100% Adaptat a Mòbils («Mobile Friendly»)
 - Barra de navegació inferior fixa estil aplicació nativa (`safe-area-bottom`) amb accés ràpid a Tauler, Preguntes, Àlbum, Intercanvis i Rànquing.
 - Paginació compacta de l'àlbum i ajustament fluid de formularis.
 

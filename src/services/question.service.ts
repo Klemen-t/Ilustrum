@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { getUserEnrolledAlbumIds } from "@/services/album.service";
 
 export interface RandomQuestionResult {
   id: string;
@@ -9,6 +10,7 @@ export interface RandomQuestionResult {
   recommendedTime: number;
   category: { id: number; name: string; color: string; icon: string | null } | null;
   subject: { id: number; name: string; color: string } | null;
+  album?: { id: string; name: string } | null;
   answers: { id: string; text: string; sortOrder: number }[]; // SENSE isCorrect!
 }
 
@@ -130,7 +132,19 @@ export async function getUserDailyQuestionStatus(userId: string): Promise<DailyQ
  * 3. Si ja ha contestat totes les preguntes correctament (no en queden de noves),
  *    fa sortir les preguntes que ha fallat més cops per reforçar l'aprenentatge.
  */
-export async function getRandomQuestion(userId: string): Promise<RandomQuestionResult | null> {
+export async function getRandomQuestion(
+  userId: string,
+  targetAlbumId?: string
+): Promise<RandomQuestionResult | null> {
+  // 0. Obtenir els IDs dels àlbums en què l'usuari està inscrit
+  const enrolledAlbumIds = await getUserEnrolledAlbumIds(userId);
+  if (enrolledAlbumIds.length === 0 && !targetAlbumId) {
+    return null; // L'usuari no participa en cap àlbum
+  }
+
+  // Filtrar exclusivament per l'àlbum demanat o pels àlbums en què participa
+  const filterAlbumIds = targetAlbumId ? [targetAlbumId] : enrolledAlbumIds;
+
   // 1. Obtenir els IDs de les preguntes que l'usuari JA ha encertat
   const correctAttempts = await prisma.questionAttempt.findMany({
     where: { userId, isCorrect: true },
@@ -139,15 +153,19 @@ export async function getRandomQuestion(userId: string): Promise<RandomQuestionR
   });
   const correctlyAnsweredIds = correctAttempts.map((a) => a.questionId);
 
-  // 2. Cercar preguntes actives que NO han estat encertades mai per aquest usuari
+  // 2. Cercar preguntes actives dels seus àlbums que NO han estat encertades mai per aquest usuari
   const unmasteredQuestions = await prisma.question.findMany({
     where: {
       isActive: true,
       id: { notIn: correctlyAnsweredIds },
+      albumId: { in: filterAlbumIds },
     },
     include: {
       category: true,
       subject: true,
+      album: {
+        select: { id: true, name: true },
+      },
       answers: true,
     },
   });
@@ -174,10 +192,14 @@ export async function getRandomQuestion(userId: string): Promise<RandomQuestionR
     }
   } else {
     // 3. No queden preguntes per encertar: totes han estat contestades correctament almenys un cop!
-    // Farem sortir les preguntes que l'alumne ha fallat MÉS cops
+    // Farem sortir les preguntes que l'alumne ha fallat MÉS cops dins dels seus àlbums
     const failCounts = await prisma.questionAttempt.groupBy({
       by: ["questionId"],
-      where: { userId, isCorrect: false },
+      where: {
+        userId,
+        isCorrect: false,
+        question: { albumId: { in: filterAlbumIds } },
+      },
       _count: { questionId: true },
       orderBy: {
         _count: {
@@ -197,10 +219,14 @@ export async function getRandomQuestion(userId: string): Promise<RandomQuestionR
         where: {
           isActive: true,
           id: { in: topFailedQuestionIds },
+          albumId: { in: filterAlbumIds },
         },
         include: {
           category: true,
           subject: true,
+          album: {
+            select: { id: true, name: true },
+          },
           answers: true,
         },
       });
@@ -213,10 +239,16 @@ export async function getRandomQuestion(userId: string): Promise<RandomQuestionR
     // Si encara no hem seleccionat res (ex. alumne que no ha fallat mai cap pregunta)
     if (!selected) {
       const allActive = await prisma.question.findMany({
-        where: { isActive: true },
+        where: {
+          isActive: true,
+          albumId: { in: filterAlbumIds },
+        },
         include: {
           category: true,
           subject: true,
+          album: {
+            select: { id: true, name: true },
+          },
           answers: true,
         },
       });
@@ -256,6 +288,12 @@ export async function getRandomQuestion(userId: string): Promise<RandomQuestionR
           id: selected.subject.id,
           name: selected.subject.name,
           color: selected.subject.color,
+        }
+      : null,
+    album: (selected as any).album
+      ? {
+          id: (selected as any).album.id,
+          name: (selected as any).album.name,
         }
       : null,
     answers: shuffledAnswers,
@@ -385,6 +423,18 @@ export async function submitAnswer(
   }
 
   if (cardsToAward > 0) {
+    // Determinar de quin àlbum atorgar cromos (prioritzar l'àlbum de la pregunta contestada)
+    const currentQ = await prisma.question.findUnique({
+      where: { id: questionId },
+      select: { albumId: true },
+    });
+    const enrolledAlbumIds = await getUserEnrolledAlbumIds(user.id);
+    const targetAlbumIds = currentQ?.albumId
+      ? [currentQ.albumId]
+      : enrolledAlbumIds.length > 0
+      ? enrolledAlbumIds
+      : undefined;
+
     const rarities = await prisma.rarity.findMany({
       orderBy: { sortOrder: "asc" },
     });
@@ -403,17 +453,31 @@ export async function submitAnswer(
         }
       }
 
-      // Buscar cromos actius d'aquesta raresa (o qualsevol actiu si no n'hi ha d'aquesta)
+      // Buscar cromos actius d'aquesta raresa per als àlbums pertinents
       let candidateCards = await prisma.card.findMany({
         where: {
           rarityId: selectedRarity.id,
           isActive: true,
+          ...(targetAlbumIds ? { albumId: { in: targetAlbumIds } } : {}),
         },
         include: {
           rarity: true,
           category: true,
         },
       });
+
+      if (candidateCards.length === 0 && targetAlbumIds) {
+        candidateCards = await prisma.card.findMany({
+          where: {
+            isActive: true,
+            albumId: { in: targetAlbumIds },
+          },
+          include: {
+            rarity: true,
+            category: true,
+          },
+        });
+      }
 
       if (candidateCards.length === 0) {
         candidateCards = await prisma.card.findMany({

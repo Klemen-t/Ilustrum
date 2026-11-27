@@ -897,90 +897,95 @@ export default function QuestionsPage() {
 
       {/* MODAL D'OBERTURA DELS SOBRES GUANYATS (1, 2 o 3) */}
       {showCardModal && result?.cardsWon && result.cardsWon.length > 0 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl rounded-3xl bg-slate-900 border border-indigo-500/40 p-6 text-center shadow-2xl relative overflow-hidden space-y-4">
-            <div className="relative z-10">
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+          <div className="w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] rounded-3xl bg-slate-900 border border-indigo-500/40 p-4 sm:p-6 text-center shadow-2xl relative flex flex-col justify-between overflow-hidden my-auto">
+            {/* Capçalera compacta */}
+            <div className="relative z-10 shrink-0">
+              <span className="inline-block px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-1">
                 🎉 SOBRES OBERTS AMB ÈXIT!
               </span>
-              <h3 className="text-2xl font-black text-white">
+              <h3 className="text-lg sm:text-2xl font-black text-white">
                 Has obtingut {result.cardsWon.length} {result.cardsWon.length === 1 ? "cromo nou" : "cromos"}!
               </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                Contestat en {result.secondsUsed} segons. Els cromos s&apos;han afegit automàticament al teu àlbum i inventari.
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-1">
+                Contestat en {result.secondsUsed}s · Afegits al teu àlbum i inventari
               </p>
             </div>
 
-            {/* Graella dels Cromos revelats */}
-            <div className={`grid gap-4 my-4 ${
-              result.cardsWon.length === 1
-                ? "grid-cols-1 max-w-xs mx-auto"
-                : result.cardsWon.length === 2
-                ? "grid-cols-1 sm:grid-cols-2"
-                : "grid-cols-1 sm:grid-cols-3"
-            }`}>
-              {result.cardsWon.map((card, idx) => (
-                <div
-                  key={`${card.id}-${idx}`}
-                  className="p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-between relative shadow-xl"
-                  style={{
-                    backgroundColor: "#0f172a",
-                    borderColor: card.rarity.colorHex,
-                    boxShadow: `0 0 20px ${card.rarity.glowColor || card.rarity.colorHex}40`,
-                  }}
-                >
-                  <div className="flex items-center justify-between w-full mb-1">
-                    <span className="text-xs font-black text-slate-400">#{card.number}</span>
-                    {card.isDuplicate ? (
-                      <span className="px-1.5 py-0.5 rounded-md bg-purple-600 text-white text-[10px] font-black">
-                        Repetit ({card.quantityTotal})
-                      </span>
-                    ) : (
-                      <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-black">
-                        Nou!
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center my-2 text-2xl shadow-inner">
-                    {card.imageUrl ? (
-                      <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover rounded-2xl" />
-                    ) : (
-                      "🃏"
-                    )}
-                  </div>
-
-                  <div className="text-sm font-extrabold text-white text-center leading-snug">
-                    {card.name}
-                  </div>
-
-                  {card.description && (
-                    <p className="text-[11px] text-slate-400 mt-1 text-center line-clamp-2">
-                      {card.description}
-                    </p>
-                  )}
-
+            {/* Graella dels Cromos revelats adaptada a mòbils (en mòbil 3 en fila compactes o scroll contingut) */}
+            <div className="overflow-y-auto my-2 py-1 px-1 max-h-[52vh] sm:max-h-none">
+              <div
+                className={`grid gap-2 sm:gap-4 ${
+                  result.cardsWon.length === 1
+                    ? "grid-cols-1 max-w-[200px] sm:max-w-xs mx-auto"
+                    : result.cardsWon.length === 2
+                    ? "grid-cols-2 max-w-md mx-auto"
+                    : "grid-cols-3 max-w-lg mx-auto"
+                }`}
+              >
+                {result.cardsWon.map((card, idx) => (
                   <div
-                    className="mt-3 text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider"
+                    key={`${card.id}-${idx}`}
+                    className="p-2 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all flex flex-col items-center justify-between relative shadow-lg"
                     style={{
-                      backgroundColor: `${card.rarity.colorHex}25`,
-                      color: card.rarity.colorHex,
-                      border: `1px solid ${card.rarity.colorHex}60`,
+                      backgroundColor: "#0f172a",
+                      borderColor: card.rarity.colorHex,
+                      boxShadow: `0 0 14px ${card.rarity.glowColor || card.rarity.colorHex}35`,
                     }}
                   >
-                    {card.rarity.name}
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <span className="text-[10px] sm:text-xs font-black text-slate-400">#{card.number}</span>
+                      {card.isDuplicate ? (
+                        <span className="px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded bg-purple-600 text-white text-[9px] sm:text-[10px] font-black">
+                          Rep. ({card.quantityTotal})
+                        </span>
+                      ) : (
+                        <span className="px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded bg-emerald-600 text-white text-[9px] sm:text-[10px] font-black">
+                          Nou!
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center my-1 sm:my-2 text-xl sm:text-2xl shadow-inner overflow-hidden">
+                      {card.imageUrl ? (
+                        <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover rounded-xl sm:rounded-2xl" />
+                      ) : (
+                        "🃏"
+                      )}
+                    </div>
+
+                    <div className="text-[11px] sm:text-sm font-extrabold text-white text-center leading-tight line-clamp-2 min-h-[1.75rem] sm:min-h-0 flex items-center justify-center">
+                      {card.name}
+                    </div>
+
+                    {card.description && (
+                      <p className="hidden sm:block text-[10px] text-slate-400 mt-1 text-center line-clamp-2">
+                        {card.description}
+                      </p>
+                    )}
+
+                    <div
+                      className="mt-1 sm:mt-2 text-[8px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider truncate max-w-full"
+                      style={{
+                        backgroundColor: `${card.rarity.colorHex}25`,
+                        color: card.rarity.colorHex,
+                        border: `1px solid ${card.rarity.colorHex}60`,
+                      }}
+                    >
+                      {card.rarity.name}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Botons del modal */}
-            <div className="flex gap-3 pt-2 max-w-sm mx-auto">
+            {/* Botons del modal sempre visibles i accessibles sense scroll */}
+            <div className="flex gap-2 sm:gap-3 pt-2 shrink-0 max-w-md mx-auto w-full">
               <a
                 href="/album"
-                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition-colors flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 sm:py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-bold text-slate-200 border border-slate-700 transition-colors flex items-center justify-center gap-1.5"
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Veure Àlbum</span>
               </a>
 
@@ -990,9 +995,10 @@ export default function QuestionsPage() {
                   setShowCardModal(false);
                   fetchNewQuestion();
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md transition-colors cursor-pointer"
+                className="flex-1 py-2.5 sm:py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs sm:text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                Següent Pregunta
+                <span>Següent Pregunta</span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>

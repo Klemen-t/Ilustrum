@@ -9,6 +9,7 @@ import {
   Loader2,
   HandMetal,
   Check,
+  Sparkles,
 } from "lucide-react";
 
 interface CardRarity {
@@ -86,6 +87,7 @@ export default function AlbumPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<AlbumCard | null>(null);
   const [pastingCardId, setPastingCardId] = useState<string | null>(null);
+  const [pastingAll, setPastingAll] = useState(false);
   const [justPastedCardId, setJustPastedCardId] = useState<string | null>(null);
   const [draggedCardId, setDraggedCardId] = useState<string | null>(null);
   const [togglingEnrollment, setTogglingEnrollment] = useState(false);
@@ -120,9 +122,60 @@ export default function AlbumPage() {
     loadAlbumData();
   }, [loadAlbumData]);
 
-  // Acció d'enganxar un cromo
+  // Acció d'enganxar un cromo de manera instantània i optimista
   const handlePasteCard = async (cardId: string) => {
-    setPastingCardId(cardId);
+    if (!album) return;
+    
+    const cardToPaste = album.unpastedCards.find((c) => c.id === cardId);
+    if (!cardToPaste) return;
+
+    // Actualització optimista instantània al client (JavaScript directe)
+    setJustPastedCardId(cardId);
+    setTimeout(() => setJustPastedCardId(null), 2500);
+
+    // Actualitzar l'estat local de l'àlbum sense esperar la xarxa
+    setAlbum((prev) => {
+      if (!prev) return null;
+
+      const newUnpasted = prev.unpastedCards.filter((c) => c.id !== cardId);
+      const newCards = prev.cards.map((c) => {
+        if (c.id === cardId || c.number === cardToPaste.number) {
+          return {
+            ...c,
+            isPasted: true,
+            pastedAt: new Date().toISOString(),
+          };
+        }
+        return c;
+      });
+
+      const newPastedCount = prev.pastedCount + 1;
+      const newCompletion = Math.round((newPastedCount / prev.totalCards) * 100);
+
+      return {
+        ...prev,
+        cards: newCards,
+        unpastedCards: newUnpasted,
+        pastedCount: newPastedCount,
+        completionPercentage: newCompletion,
+      };
+    });
+
+    // Actualitzar també a la llista d'àlbums
+    setAlbums((prev) =>
+      prev.map((a) => {
+        if (a.id === album.id) {
+          const newPasted = (a as any).pastedCount ? (a as any).pastedCount + 1 : 1;
+          return {
+            ...a,
+            completionPercentage: Math.round((newPasted / a.totalCards) * 100),
+          };
+        }
+        return a;
+      })
+    );
+
+    // Enviar petició en segon pla
     try {
       const res = await fetch("/api/album/paste", {
         method: "POST",
@@ -130,21 +183,88 @@ export default function AlbumPage() {
         body: JSON.stringify({ cardId }),
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        setJustPastedCardId(cardId);
-        setTimeout(() => setJustPastedCardId(null), 2500);
-        // Recarregar estat de l'àlbum
+      if (!res.ok) {
+        // En cas d'error revertir o sincronitzar
         if (selectedAlbumId) {
           await loadAlbumData(selectedAlbumId);
         }
-      } else {
-        alert(data.error || "No s'ha pogut enganxar el cromo.");
       }
     } catch {
-      alert("Error de connexió en enganxar el cromo.");
+      // Revertir sincronitzant si falla la xarxa
+      if (selectedAlbumId) {
+        await loadAlbumData(selectedAlbumId);
+      }
+    }
+  };
+
+  // Acció d'enganxar TOTS els cromos pendents alhora
+  const handlePasteAllCards = async () => {
+    if (!album || album.unpastedCards.length === 0) return;
+
+    const cardsToPaste = [...album.unpastedCards];
+    setPastingAll(true);
+
+    // Actualització optimista instantània de tots els cromos
+    setAlbum((prev) => {
+      if (!prev) return null;
+
+      const unpastedIds = new Set(cardsToPaste.map((c) => c.id));
+      const unpastedNumbers = new Set(cardsToPaste.map((c) => c.number));
+
+      const newCards = prev.cards.map((c) => {
+        if (unpastedIds.has(c.id) || unpastedNumbers.has(c.number)) {
+          return {
+            ...c,
+            isPasted: true,
+            pastedAt: new Date().toISOString(),
+          };
+        }
+        return c;
+      });
+
+      const newPastedCount = Math.min(prev.totalCards, prev.pastedCount + cardsToPaste.length);
+      const newCompletion = Math.round((newPastedCount / prev.totalCards) * 100);
+
+      return {
+        ...prev,
+        cards: newCards,
+        unpastedCards: [],
+        pastedCount: newPastedCount,
+        completionPercentage: newCompletion,
+      };
+    });
+
+    setAlbums((prev) =>
+      prev.map((a) => {
+        if (a.id === album.id) {
+          const newPasted = Math.min(a.totalCards, (a.ownedCount || 0));
+          return {
+            ...a,
+            completionPercentage: Math.round((newPasted / a.totalCards) * 100),
+          };
+        }
+        return a;
+      })
+    );
+
+    try {
+      const res = await fetch("/api/album/paste-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ albumId: album.id }),
+      });
+
+      if (!res.ok) {
+        if (selectedAlbumId) {
+          await loadAlbumData(selectedAlbumId);
+        }
+      }
+    } catch {
+      if (selectedAlbumId) {
+        await loadAlbumData(selectedAlbumId);
+      }
     } finally {
-      setPastingCardId(null);
+      setPastingAll(false);
     }
   };
 
@@ -449,7 +569,7 @@ export default function AlbumPage() {
           {/* SAFATA INFERIOR / A LA MÀ: CROMOS PENDENTS D'ENGANXAR */}
           {album.unpastedCards && album.unpastedCards.length > 0 && (
             <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-indigo-500/10 to-purple-500/15 border border-amber-500/30 shadow-xl space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
                     🃏
@@ -466,6 +586,21 @@ export default function AlbumPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Botó per enganxar-los tots alhora */}
+                <button
+                  type="button"
+                  onClick={handlePasteAllCards}
+                  disabled={pastingAll}
+                  className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 shrink-0 cursor-pointer"
+                >
+                  {pastingAll ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-slate-950" />
+                  )}
+                  <span>Enganxar tots els cromos ({album.unpastedCards.length})</span>
+                </button>
               </div>
 
               {/* Llista de cromos a la mà */}

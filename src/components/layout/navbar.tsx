@@ -165,8 +165,8 @@ export function Navbar({ user }: NavbarProps) {
           </div>
         </div>
 
-        {/* Barra de navegació Mobile Superior (Desplaçament Horitzontal de suport) */}
-        <div className="flex md:hidden overflow-x-auto py-2 gap-1 border-t border-slate-800/60 no-scrollbar text-xs">
+        {/* Barra de navegació Mobile Superior - Adaptada a la pantalla sense scroll horitzontal */}
+        <div className="flex md:hidden items-center justify-between py-2 border-t border-slate-800/60 text-xs">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname.startsWith(link.href);
@@ -174,14 +174,14 @@ export function Navbar({ user }: NavbarProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold shrink-0 transition-all ${
+                className={`flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-xl font-bold transition-all text-center ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                    : "text-slate-400 hover:text-white bg-slate-900/60"
+                    ? "bg-indigo-600/30 text-indigo-300 border border-indigo-500/40"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
-                <Icon style={{ width: "14px", height: "14px" }} />
-                <span>{link.label}</span>
+                <Icon style={{ width: "16px", height: "16px" }} />
+                <span className="text-[10px] tracking-tight mt-0.5 truncate max-w-full">{link.label}</span>
               </Link>
             );
           })}

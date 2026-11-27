@@ -435,31 +435,47 @@ export default function QuestionsPage() {
                 let icon = "📚";
                 let badgeColor = "bg-indigo-500/10 border-indigo-500/30 text-indigo-300";
                 let gradient = "from-indigo-950/40 to-slate-900";
+                let bgCover = "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80";
 
                 if (isMusicTrista) {
                   icon = "🎵";
                   badgeColor = "bg-blue-500/10 border-blue-500/30 text-blue-300";
-                  gradient = "from-blue-950/40 to-slate-900";
+                  gradient = "from-blue-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80";
                 } else if (isMusicPower) {
                   icon = "⚡";
                   badgeColor = "bg-amber-500/10 border-amber-500/30 text-amber-300";
-                  gradient = "from-amber-950/40 to-slate-900";
+                  gradient = "from-purple-950/80 to-amber-950/80";
+                  bgCover = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80";
                 } else if (isHardware) {
                   icon = "🖥️";
                   badgeColor = "bg-cyan-500/10 border-cyan-500/30 text-cyan-300";
-                  gradient = "from-cyan-950/40 to-slate-900";
+                  gradient = "from-cyan-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80";
                 } else if (isSistemes) {
                   icon = "🌐";
                   badgeColor = "bg-emerald-500/10 border-emerald-500/30 text-emerald-300";
-                  gradient = "from-emerald-950/40 to-slate-900";
+                  gradient = "from-emerald-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80";
                 }
 
                 return (
                   <div
                     key={album.id}
-                    className={`p-6 rounded-3xl bg-gradient-to-b ${gradient} border border-slate-800 hover:border-indigo-500/60 transition-all flex flex-col justify-between space-y-4 shadow-xl hover:shadow-2xl group`}
+                    className="relative p-6 rounded-3xl border border-slate-800 hover:border-indigo-500/60 transition-all flex flex-col justify-between space-y-4 shadow-xl hover:shadow-2xl group overflow-hidden"
                   >
-                    <div className="space-y-3">
+                    {/* Fons temàtic de l'àlbum */}
+                    <div className="absolute inset-0 z-0 pointer-events-none">
+                      <img
+                        src={bgCover}
+                        alt={album.name}
+                        className="w-full h-full object-cover opacity-20 filter blur-[1px] group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className={`absolute inset-0 bg-gradient-to-b ${gradient} mix-blend-multiply`} />
+                      <div className="absolute inset-0 bg-slate-950/60" />
+                    </div>
+
+                    <div className="relative z-10 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="w-12 h-12 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
                           {icon}
@@ -474,7 +490,7 @@ export default function QuestionsPage() {
                           {album.name}
                         </h3>
                         {album.description && (
-                          <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">
                             {album.description}
                           </p>
                         )}
@@ -499,7 +515,7 @@ export default function QuestionsPage() {
                     <button
                       type="button"
                       onClick={() => handleSelectAlbum(album)}
-                      className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] cursor-pointer"
+                      className="relative z-10 w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] cursor-pointer"
                     >
                       <span>Respondre preguntes d&apos;aquest àlbum</span>
                       <ArrowRight className="w-4 h-4" />

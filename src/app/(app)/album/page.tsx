@@ -238,6 +238,58 @@ export default function AlbumPage() {
     }
   };
 
+  // Estils i imatges temàtiques de fons segons l'àlbum
+  const getAlbumTheme = (albumId: string) => {
+    if (albumId.includes("trista")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-blue-950/85 to-slate-950/95",
+        borderColor: "border-blue-500/40",
+        ringColor: "ring-blue-500/20",
+        bindingSpine: "from-blue-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-blue-950/40 border-blue-800/40",
+        badgeBg: "bg-blue-500/15 border-blue-500/40 text-blue-300",
+        ambientGlow: "rgba(59, 130, 246, 0.15)",
+      };
+    } else if (albumId.includes("bemparida")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-purple-950/85 to-amber-950/90",
+        borderColor: "border-amber-500/50",
+        ringColor: "ring-amber-500/20",
+        bindingSpine: "from-amber-950 via-purple-950 to-slate-900",
+        cardSlotBg: "bg-purple-950/40 border-amber-800/40",
+        badgeBg: "bg-amber-500/15 border-amber-500/40 text-amber-300",
+        ambientGlow: "rgba(245, 158, 11, 0.18)",
+      };
+    } else if (albumId.includes("m01") || albumId.includes("hardware")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-cyan-950/85 to-slate-950/95",
+        borderColor: "border-cyan-500/40",
+        ringColor: "ring-cyan-500/20",
+        bindingSpine: "from-cyan-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-cyan-950/40 border-cyan-800/40",
+        badgeBg: "bg-cyan-500/15 border-cyan-500/40 text-cyan-300",
+        ambientGlow: "rgba(6, 182, 212, 0.15)",
+      };
+    } else {
+      // M02 o Sistemes & Xarxes
+      return {
+        coverImage: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-emerald-950/85 to-slate-950/95",
+        borderColor: "border-emerald-500/40",
+        ringColor: "ring-emerald-500/20",
+        bindingSpine: "from-emerald-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-emerald-950/40 border-emerald-800/40",
+        badgeBg: "bg-emerald-500/15 border-emerald-500/40 text-emerald-300",
+        ambientGlow: "rgba(16, 185, 129, 0.15)",
+      };
+    }
+  };
+
+  const albumTheme = album ? getAlbumTheme(album.id) : null;
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-16">
       {/* Selector d'Àlbums & Progrés General */}
@@ -371,10 +423,36 @@ export default function AlbumPage() {
             </div>
           )}
 
-          {/* L'ÀLBUM FÍSIC EN FORMAT VERTICAL */}
-          <div className="relative mx-auto rounded-3xl bg-[#0f172a] border-4 border-slate-800 shadow-2xl overflow-hidden">
+          {/* L'ÀLBUM FÍSIC EN FORMAT VERTICAL AMB FONS TEMÀTIC REAL */}
+          <div
+            className={`relative mx-auto rounded-3xl bg-[#090d16] border-4 ${
+              albumTheme?.borderColor || "border-slate-800"
+            } shadow-2xl overflow-hidden transition-all duration-500`}
+            style={{
+              boxShadow: albumTheme ? `0 20px 50px -10px ${albumTheme.ambientGlow}` : undefined,
+            }}
+          >
+            {/* IMATGE DE FONS TEMÀTICA AMB CAPA D'OPACITAT D'ÀLBUM DE CROMOS */}
+            {albumTheme && (
+              <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <img
+                  src={albumTheme.coverImage}
+                  alt={album.name}
+                  className="w-full h-full object-cover object-center opacity-25 filter blur-[2px] scale-105 transform"
+                />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${albumTheme.textureOverlay} mix-blend-multiply`}
+                />
+                <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px]" />
+              </div>
+            )}
+
             {/* Vora d'enquadernació física a l'esquerra (simulació de llom de cuir / espiral) */}
-            <div className="absolute top-0 bottom-0 left-0 w-6 sm:w-8 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800/80 border-r border-slate-700/50 flex flex-col justify-around items-center py-6 z-10">
+            <div
+              className={`absolute top-0 bottom-0 left-0 w-6 sm:w-8 bg-gradient-to-r ${
+                albumTheme?.bindingSpine || "from-slate-950 via-slate-900 to-slate-800/80"
+              } border-r border-slate-700/50 flex flex-col justify-around items-center py-6 z-10 shadow-lg`}
+            >
               {[...Array(8)].map((_, i) => (
                 <div
                   key={i}
@@ -384,7 +462,7 @@ export default function AlbumPage() {
             </div>
 
             {/* Contingut de la Pàgina de l'Àlbum */}
-            <div className="pl-8 sm:pl-12 pr-4 sm:pr-8 py-6 space-y-6 bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-950 min-h-[700px] flex flex-col justify-between">
+            <div className="relative z-10 pl-8 sm:pl-12 pr-4 sm:pr-8 py-6 space-y-6 min-h-[700px] flex flex-col justify-between">
               {/* Capçal de la Pàgina */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
                 <div>
@@ -481,7 +559,7 @@ export default function AlbumPage() {
                           ? "bg-slate-900/90 border-2 cursor-pointer hover:scale-105 hover:shadow-2xl hover:z-20 group"
                           : card.isOwned
                           ? "bg-amber-950/20 border-2 border-dashed border-amber-400/80 animate-pulse shadow-inner"
-                          : "bg-slate-950/60 border border-slate-800/80 shadow-inner"
+                          : `${albumTheme?.cardSlotBg || "bg-slate-950/60 border-slate-800/80"} border shadow-inner backdrop-blur-sm`
                       }`}
                       style={{
                         borderColor: card.isPasted

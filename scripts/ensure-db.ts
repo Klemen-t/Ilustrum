@@ -54,35 +54,6 @@ async function main() {
         },
       });
     }
-
-    if (studentRole) {
-      await prisma.user.upsert({
-        where: { email: "jrosanas17@gmail.com" },
-        update: { roleId: studentRole.id, isActive: true },
-        create: {
-          email: "jrosanas17@gmail.com",
-          name: "J. Rosanas",
-          displayName: "J. Rosanas (Alumne)",
-          roleId: studentRole.id,
-          level: 1,
-          xp: 0,
-          xpToNextLevel: 100,
-          isActive: true,
-          stats: {
-            create: {
-              totalAnswers: 0,
-              correctAnswers: 0,
-              totalCards: 0,
-              uniqueCards: 0,
-              pastedCards: 0,
-              tradesCompleted: 0,
-              streakDays: 1,
-              lastActivityDate: new Date(),
-            },
-          },
-        },
-      });
-    }
   } catch (error) {
     console.error("Avís durant ensure-db:", error);
   } finally {

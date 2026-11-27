@@ -8,7 +8,7 @@ const JWT_SECRET = new TextEncoder().encode(
 
 const COOKIE_NAME = "ilustrum_session";
 const ALLOWED_DOMAIN = (process.env.ALLOWED_EMAIL_DOMAIN || "lacetania.cat").toLowerCase();
-const EXTRA_ALLOWED_EMAILS = ["jrosanas17@gmail.com"];
+const EXTRA_ALLOWED_EMAILS: string[] = [];
 
 export interface SessionPayload {
   userId: string;

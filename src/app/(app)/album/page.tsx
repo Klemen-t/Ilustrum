@@ -206,13 +206,40 @@ export default function AlbumPage() {
         case 5: return "Pàgina 5: Targetes Gràfiques & Eines";
         default: return `Pàgina ${page}`;
       }
-    } else if (albumId.includes("m02") || albumId.includes("xarxes")) {
+    } else if (albumId.includes("m02")) {
       switch (page) {
         case 1: return "Pàgina 1: GNU/Linux, Bash & Kernel";
-        case 2: return "Pàgina 2: Windows Server & Active Directory";
-        case 3: return "Pàgina 3: Cablejat Estructurat & Capa Física";
-        case 4: return "Pàgina 4: Adreçament IP & Protocols";
-        case 5: return "Pàgina 5: Serveis de Xarxa & Ciberseguretat";
+        case 2: return "Pàgina 2: Sistemes de Fitxers & Gestió";
+        default: return `Pàgina ${page}`;
+      }
+    } else if (albumId.includes("m03")) {
+      switch (page) {
+        case 1: return "Pàgina 1: Fulls de Càlcul & Fórmules";
+        case 2: return "Pàgina 2: Processament de Textos & BD";
+        default: return `Pàgina ${page}`;
+      }
+    } else if (albumId.includes("m04")) {
+      switch (page) {
+        case 1: return "Pàgina 1: Active Directory & GPO";
+        case 2: return "Pàgina 2: Serveis Corporatius & SAMBA";
+        default: return `Pàgina ${page}`;
+      }
+    } else if (albumId.includes("m05") || albumId.includes("xarxes")) {
+      switch (page) {
+        case 1: return "Pàgina 1: Cablejat & Commutació L2";
+        case 2: return "Pàgina 2: Adreçament IP & VLANs";
+        default: return `Pàgina ${page}`;
+      }
+    } else if (albumId.includes("m06") || albumId.includes("seguretat")) {
+      switch (page) {
+        case 1: return "Pàgina 1: Ciberseguretat & Criptografia";
+        case 2: return "Pàgina 2: Tallafocs, Backups & Malware";
+        default: return `Pàgina ${page}`;
+      }
+    } else if (albumId.includes("m07") || albumId.includes("serveis")) {
+      switch (page) {
+        case 1: return "Pàgina 1: Servidors DNS & DHCP";
+        case 2: return "Pàgina 2: Servidors Web, Correu & Proxy";
         default: return `Pàgina ${page}`;
       }
     } else if (albumId.includes("trista")) {
@@ -265,6 +292,28 @@ export default function AlbumPage() {
     } else if (albumId.includes("m01") || albumId.includes("hardware")) {
       return {
         coverImage: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-amber-950/85 to-slate-950/95",
+        borderColor: "border-amber-500/40",
+        ringColor: "ring-amber-500/20",
+        bindingSpine: "from-amber-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-amber-950/40 border-amber-800/40",
+        badgeBg: "bg-amber-500/15 border-amber-500/40 text-amber-300",
+        ambientGlow: "rgba(245, 158, 11, 0.15)",
+      };
+    } else if (albumId.includes("m02")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-blue-950/85 to-slate-950/95",
+        borderColor: "border-blue-500/40",
+        ringColor: "ring-blue-500/20",
+        bindingSpine: "from-blue-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-blue-950/40 border-blue-800/40",
+        badgeBg: "bg-blue-500/15 border-blue-500/40 text-blue-300",
+        ambientGlow: "rgba(59, 130, 246, 0.15)",
+      };
+    } else if (albumId.includes("m03")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&auto=format&fit=crop&q=80",
         textureOverlay: "from-slate-950/92 via-cyan-950/85 to-slate-950/95",
         borderColor: "border-cyan-500/40",
         ringColor: "ring-cyan-500/20",
@@ -273,8 +322,18 @@ export default function AlbumPage() {
         badgeBg: "bg-cyan-500/15 border-cyan-500/40 text-cyan-300",
         ambientGlow: "rgba(6, 182, 212, 0.15)",
       };
-    } else {
-      // M02 o Sistemes & Xarxes
+    } else if (albumId.includes("m04")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-indigo-950/85 to-slate-950/95",
+        borderColor: "border-indigo-500/40",
+        ringColor: "ring-indigo-500/20",
+        bindingSpine: "from-indigo-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-indigo-950/40 border-indigo-800/40",
+        badgeBg: "bg-indigo-500/15 border-indigo-500/40 text-indigo-300",
+        ambientGlow: "rgba(99, 102, 241, 0.15)",
+      };
+    } else if (albumId.includes("m05")) {
       return {
         coverImage: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&auto=format&fit=crop&q=80",
         textureOverlay: "from-slate-950/92 via-emerald-950/85 to-slate-950/95",
@@ -284,6 +343,39 @@ export default function AlbumPage() {
         cardSlotBg: "bg-emerald-950/40 border-emerald-800/40",
         badgeBg: "bg-emerald-500/15 border-emerald-500/40 text-emerald-300",
         ambientGlow: "rgba(16, 185, 129, 0.15)",
+      };
+    } else if (albumId.includes("m06")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-rose-950/85 to-slate-950/95",
+        borderColor: "border-rose-500/40",
+        ringColor: "ring-rose-500/20",
+        bindingSpine: "from-rose-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-rose-950/40 border-rose-800/40",
+        badgeBg: "bg-rose-500/15 border-rose-500/40 text-rose-300",
+        ambientGlow: "rgba(239, 68, 68, 0.15)",
+      };
+    } else if (albumId.includes("m07")) {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-purple-950/85 to-slate-950/95",
+        borderColor: "border-purple-500/40",
+        ringColor: "ring-purple-500/20",
+        bindingSpine: "from-purple-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-purple-950/40 border-purple-800/40",
+        badgeBg: "bg-purple-500/15 border-purple-500/40 text-purple-300",
+        ambientGlow: "rgba(139, 92, 246, 0.15)",
+      };
+    } else {
+      return {
+        coverImage: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&auto=format&fit=crop&q=80",
+        textureOverlay: "from-slate-950/92 via-slate-900/85 to-slate-950/95",
+        borderColor: "border-indigo-500/40",
+        ringColor: "ring-indigo-500/20",
+        bindingSpine: "from-slate-950 via-slate-900 to-slate-800",
+        cardSlotBg: "bg-slate-900/40 border-slate-800/40",
+        badgeBg: "bg-indigo-500/15 border-indigo-500/40 text-indigo-300",
+        ambientGlow: "rgba(99, 102, 241, 0.15)",
       };
     }
   };

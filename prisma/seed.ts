@@ -171,36 +171,36 @@ async function main() {
   const getCategory = (slug: string) => categories.find((c) => c.slug === slug)!;
   const getSubject = (slug: string) => subjects.find((s) => s.slug === slug)!;
 
+  
   // ========================================================
-  // 6. ÀLBUM 1: Hardware & Muntatge d'Equips (SMIX M01) - 50 CROMOS
+  // ÀLBUM: M01: Muntatge i Manteniment d'Equips (album-smix-m01-hardware) - 20 CROMOS
   // ========================================================
-  const album1 = await prisma.album.upsert({
+  const album_smix_m01_hardware = await prisma.album.upsert({
     where: { id: "album-smix-m01-hardware" },
     update: {
-      name: "Hardware & Muntatge d'Equips (SMIX M01)",
-      description: "Col·lecció de 50 cromos dels components essencials, microarquitectures i eines de taller del tècnic informàtic.",
-      totalCards: 50,
+      name: "M01: Muntatge i Manteniment d'Equips",
+      description: "Col·lecció de cromos sobre microprocessadors, plaques base, memòries, emmagatzematge, refrigeració i eines de taller.",
+      totalCards: 20,
       sortOrder: 1,
       isActive: true,
     },
     create: {
       id: "album-smix-m01-hardware",
-      name: "Hardware & Muntatge d'Equips (SMIX M01)",
-      description: "Col·lecció de 50 cromos dels components essencials, microarquitectures i eines de taller del tècnic informàtic.",
-      totalCards: 50,
+      name: "M01: Muntatge i Manteniment d'Equips",
+      description: "Col·lecció de cromos sobre microprocessadors, plaques base, memòries, emmagatzematge, refrigeració i eines de taller.",
+      totalCards: 20,
       sortOrder: 1,
       isActive: true,
     },
   });
 
-  // Crear 5 pàgines per a l'Àlbum 1 (10 cromos per pàgina)
-  const album1Pages = await Promise.all(
-    Array.from({ length: 5 }).map((_, i) =>
+  const pages_album_smix_m01_hardware = await Promise.all(
+    Array.from({ length: 2 }).map((_, i) =>
       prisma.albumPage.upsert({
-        where: { albumId_pageNum: { albumId: album1.id, pageNum: i + 1 } },
+        where: { albumId_pageNum: { albumId: "album-smix-m01-hardware", pageNum: i + 1 } },
         update: { layout: "grid-5x2" },
         create: {
-          albumId: album1.id,
+          albumId: "album-smix-m01-hardware",
           pageNum: i + 1,
           layout: "grid-5x2",
         },
@@ -208,77 +208,39 @@ async function main() {
     )
   );
 
-  // 50 cromos per a l'Àlbum 1
-  const cardsAlbum1Data = [
-    // Pàgina 1: Processadors & Sòcols (1-10)
-    { num: 1, name: "Intel Core i9-14900K", rarity: "legendary", cat: "hardware", desc: "Flagship de 24 nuclis (8P+16E) i 32 fils fins a 6.0 GHz en sòcol LGA1700." , imageUrl: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80" },
-    { num: 2, name: "AMD Ryzen 9 7950X", rarity: "uncommon", cat: "hardware", desc: "Processador Zen 4 de 16 nuclis i 32 fils a 5.7 GHz en sòcol AM5." , imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
-    { num: 3, name: "Sòcol Intel LGA1700", rarity: "common", cat: "hardware", desc: "Sòcol Land Grid Array amb 1700 pins al sòcol i contactes al processador." , imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
-    { num: 4, name: "Sòcol AMD AM5", rarity: "common", cat: "hardware", desc: "Primer sòcol LGA d'AMD per a escriptori amb 1718 pins i suport DDR5." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 5, name: "Intel Core i5-13400F", rarity: "common", cat: "hardware", desc: "Processador de gamma mitjana de 10 nuclis sense gràfics integrats." , imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
-    { num: 6, name: "AMD Ryzen 5 7600", rarity: "common", cat: "hardware", desc: "Processador de 6 nuclis i 12 fils amb arquitectura Zen 4 i 65W TDP." , imageUrl: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80" },
-    { num: 7, name: "Microarquitectura Zen 4", rarity: "common", cat: "hardware", desc: "Litografia de 5nm de TSMC amb instruccions AVX-512 per a càlcul vectorial." , imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
-    { num: 8, name: "Bus PCIe 5.0", rarity: "uncommon", cat: "hardware", desc: "Interconnexió amb ample de banda de fins a 32 GT/s per carril." , imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
-    { num: 9, name: "Memòria Cau L3 Compartida", rarity: "common", cat: "hardware", desc: "Memòria ultraràpida integrada a la CPU de fins a 96MB amb 3D V-Cache." , imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
-    { num: 10, name: "Intel Core Ultra 9 Meteor Lake", rarity: "common", cat: "hardware", desc: "Arquitectura desglossada en chiplets (tiles) amb NPU d'intel·ligència artificial." , imageUrl: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80" },
+  const cards_album_smix_m01_hardware_data = [
 
-    // Pàgina 2: Memòria & Emmagatzematge (11-20)
-    { num: 11, name: "Memòria RAM DDR5 6000MHz", rarity: "rare", cat: "hardware", desc: "Mòdul DDR5 amb circuits integrats PMIC a la placa i ECC al xip (on-die)." , imageUrl: "https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?w=600&auto=format&fit=crop&q=80" },
-    { num: 12, name: "Memòria RAM DDR4 3200MHz", rarity: "common", cat: "hardware", desc: "Estàndard àmpliament utilitzat de 288 contactes amb voltatge típic de 1.2V." , imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
-    { num: 13, name: "SSD NVMe M.2 PCIe 4.0", rarity: "uncommon", cat: "hardware", desc: "Unitat d'estat sòlid M.2 2280 amb velocitats de lectura de fins a 7.400 MB/s." , imageUrl: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80" },
-    { num: 14, name: "SSD SATA 2.5 polzades", rarity: "common", cat: "hardware", desc: "Unitat d'emmagatzematge sòlid amb interfície SATA III limitada a 600 MB/s." , imageUrl: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?w=600&auto=format&fit=crop&q=80" },
-    { num: 15, name: "Disc Dur HDD 3.5 7200 RPM", rarity: "common", cat: "hardware", desc: "Unitat magnètica mecànica amb plats giratoris i capçal de lectura/escriptura." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 16, name: "Perfil Intel XMP 3.0", rarity: "common", cat: "hardware", desc: "Perfils d'overclocking predefinits al mòdul SPD de la memòria RAM." , imageUrl: "https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?w=600&auto=format&fit=crop&q=80" },
-    { num: 17, name: "Perfil AMD EXPO", rarity: "common", cat: "hardware", desc: "Estàndard obert per a perfils de sincronització de memòria d'alta freqüència." , imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
-    { num: 18, name: "Configuració RAID 0 (Stripping)", rarity: "common", cat: "hardware", desc: "Distribució de dades entre discos per màxima velocitat sense tolerància a fallades." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 19, name: "Configuració RAID 1 (Mirroring)", rarity: "common", cat: "hardware", desc: "Duplicació idèntica de la informació en dos discs per tolerància a fallades." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 20, name: "Configuració RAID 5 amb Paritat", rarity: "uncommon", cat: "hardware", desc: "Combina paritat distribuïda i rendiment amb un mínim de 3 discos requerits." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 1, name: "Intel Core i9-14900K", rarity: "legendary", cat: "hardware", desc: "Flagship de 24 nuclis (8P+16E) i 32 fils fins a 6.0 GHz en sòcol LGA1700.", imageUrl: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80" },
+    { num: 2, name: "AMD Ryzen 9 7950X", rarity: "epic", cat: "hardware", desc: "Processador Zen 4 de 16 nuclis i 32 fils a 5.7 GHz en sòcol AM5.", imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
+    { num: 3, name: "Sòcol Intel LGA1700", rarity: "common", cat: "hardware", desc: "Sòcol Land Grid Array amb 1700 contactes a la placa base.", imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
+    { num: 4, name: "Sòcol AMD AM5", rarity: "common", cat: "hardware", desc: "Primer sòcol LGA d'AMD per a escriptori amb 1718 pins i suport DDR5.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 5, name: "Memòria RAM DDR5 6000MHz", rarity: "rare", cat: "hardware", desc: "Mòdul DDR5 amb circuit PMIC a la placa i ECC intern on-die.", imageUrl: "https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?w=600&auto=format&fit=crop&q=80" },
+    { num: 6, name: "Memòria RAM DDR4 3200MHz", rarity: "common", cat: "hardware", desc: "Estàndard de 288 contactes amb voltatge operatiu típic d'1.2V.", imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
+    { num: 7, name: "SSD NVMe M.2 PCIe 4.0", rarity: "uncommon", cat: "hardware", desc: "Unitat sòlida M.2 2280 amb lectura d'alt rendiment fins a 7.400 MB/s.", imageUrl: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80" },
+    { num: 8, name: "Disc Dur Mecànic HDD 3.5", rarity: "common", cat: "hardware", desc: "Emmagatzematge magnètic tradicional amb plats giratoris a 7200 RPM.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 9, name: "Placa Base ASUS ROG Maximus", rarity: "rare", cat: "hardware", desc: "Placa mare de gamma alta per a entusiastes amb 24 fases de potència.", imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
+    { num: 10, name: "Firmware UEFI BIOS", rarity: "uncommon", cat: "hardware", desc: "Substitut modern de la BIOS clàssica amb suport de taules GPT i Secure Boot.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 11, name: "Pila CMOS CR2032", rarity: "common", cat: "hardware", desc: "Bateria de liti de 3V que manté el rellotge RTC i la memòria volàtil de configuració.", imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
+    { num: 12, name: "Font d'Alimentació 850W 80 Plus Gold", rarity: "uncommon", cat: "hardware", desc: "Font eficient amb més d'un 90% d'eficiència i modularitat de cables.", imageUrl: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80" },
+    { num: 13, name: "Refrigeració Líquida AIO 360mm", rarity: "rare", cat: "hardware", desc: "Kit tot en un de circuit tancat amb radiador triple per a overclocking.", imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
+    { num: 14, name: "Pasta Tèrmica d'Alt Rendiment", rarity: "common", cat: "hardware", desc: "Compost tèrmic que elimina microbombolles d'aire entre IHS i dissipador.", imageUrl: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80" },
+    { num: 15, name: "NVIDIA GeForce RTX 4090", rarity: "legendary", cat: "hardware", desc: "Monstre gràfic de 24GB GDDR6X per a renderització 3D i càlcul IA.", imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
+    { num: 16, name: "Polímetre Digital de Taller", rarity: "uncommon", cat: "hardware", desc: "Multímetre de precisió per mesurar tensions de les línies de 12V, 5V i 3.3V.", imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
+    { num: 17, name: "Polsera Antiestàtica ESD", rarity: "common", cat: "hardware", desc: "Protecció contra descàrregues electroestàtiques que podrien danyar semiconductors.", imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
+    { num: 18, name: "Targeta de Diagnòstic POST PCI", rarity: "common", cat: "hardware", desc: "Eina que mostra el codi hexadecimal d'error durant la fase d'arrencada.", imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
+    { num: 19, name: "Joc de Tornavisos de Precisió", rarity: "common", cat: "hardware", desc: "Eines imantades essencials per al muntatge i desmuntatge de components.", imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
+    { num: 20, name: "Sistema de SAI / UPS en Línia", rarity: "uncommon", cat: "hardware", desc: "Subministrament d'energia ininterromput amb filtratge de sobretensions i bateria.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
 
-    // Pàgina 3: Plaques Base & Xipsets (21-30)
-    { num: 21, name: "Placa Base ASUS ROG Maximus", rarity: "rare", cat: "hardware", desc: "Placa mare de gamma alta per a entusiastes amb 24 fases de potència i Wi-Fi 7." , imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
-    { num: 22, name: "Factor de Forma ATX", rarity: "common", cat: "hardware", desc: "Mida estàndard de 305 x 244 mm amb fins a 7 ranures d'expansió disponibles." , imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
-    { num: 23, name: "Factor de Forma Micro-ATX", rarity: "common", cat: "hardware", desc: "Mida compacta de 244 x 244 mm ideal per torres mitjanes d'oficina." , imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
-    { num: 24, name: "Factor de Forma Mini-ITX", rarity: "common", cat: "hardware", desc: "Mida ultracompacta de 170 x 170 mm amb només una ranura PCIe x16." , imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
-    { num: 25, name: "Firmware UEFI BIOS", rarity: "uncommon", cat: "hardware", desc: "Substitut modern de la BIOS clàssica amb suport GPT, Secure Boot i interfície gràfica." , imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
-    { num: 26, name: "Pila de Botó CMOS CR2032", rarity: "common", cat: "hardware", desc: "Bateria de liti de 3V que manté l'hora del sistema RTC i la memòria volàtil CMOS." , imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
-    { num: 27, name: "Fases d'Alimentació VRM", rarity: "common", cat: "hardware", desc: "Mòdul regulador de voltatge que redueix els 12V de la font al voltatge precís de la CPU." , imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
-    { num: 28, name: "Xipset Intel Z790", rarity: "uncommon", cat: "hardware", desc: "Controlador principal de placa amb suport complet d'overclocking i carrils PCIe gen 5." , imageUrl: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80" },
-    { num: 29, name: "Xipset AMD B650", rarity: "common", cat: "hardware", desc: "Plataforma equilibrada per a processadors AM5 amb excel·lent relació qualitat-preu." , imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
-    { num: 30, name: "Xip Criptogràfic TPM 2.0", rarity: "common", cat: "hardware", desc: "Mòdul de plataforma segura per a emmagatzematge de claus BitLocker i seguretat." , imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
-
-    // Pàgina 4: Refrigeració & Alimentació (31-40)
-    { num: 31, name: "Font d'Alimentació 850W 80 Plus Gold", rarity: "uncommon", cat: "hardware", desc: "Font eficient amb més d'un 90% d'eficiència energètica i condensadors japonesos." , imageUrl: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80" },
-    { num: 32, name: "Font d'Alimentació Totalment Modular", rarity: "common", cat: "hardware", desc: "Permet connectar només els cables necessaris facilitant la gestió de flux d'aire." , imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
-    { num: 33, name: "Dissipador d'Aire amb Heatpipes", rarity: "common", cat: "hardware", desc: "Bloc d'aletes d'alumini amb tubs de coure de canvi de fase per conduir la calor." , imageUrl: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80" },
-    { num: 34, name: "Refrigeració Líquida AIO 360mm", rarity: "rare", cat: "hardware", desc: "Circuit tancat de bomba, tub i radiador triple de 360mm per a màxima transferència." , imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
-    { num: 35, name: "Ventilador PWM de 120mm", rarity: "common", cat: "hardware", desc: "Ventilador amb connector de 4 pins per a control precís de velocitat per polsos." , imageUrl: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80" },
-    { num: 36, name: "Consum Tèrmic de Disseny (TDP)", rarity: "common", cat: "hardware", desc: "Potència màxima de calor que el sistema de refrigeració ha de ser capaç de dissipar." , imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
-    { num: 37, name: "Pasta Tèrmica d'Alt Rendiment", rarity: "common", cat: "hardware", desc: "Compost tèrmic que elimina les microbufetes d'aire entre l'IHS de la CPU i la base." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-    { num: 38, name: "Certificació 80 Plus Platinum", rarity: "common", cat: "hardware", desc: "Certificació d'altíssima eficiència del 92-94% sota càrregues de treball contínues." , imageUrl: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80" },
-    { num: 39, name: "Cable PCIe 12VHPWR (ATX 3.0)", rarity: "uncommon", cat: "hardware", desc: "Connector de 16 pins capaç de subministrar fins a 600W de potència directa a la GPU." , imageUrl: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?w=600&auto=format&fit=crop&q=80" },
-    { num: 40, name: "Refrigeració Líquida Custom Loop", rarity: "common", cat: "hardware", desc: "Circuit artesanal amb dipòsit, tubs rígids de metacrilat i blocs d'aigua dedicats." , imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
-
-    // Pàgina 5: Targetes Gràfiques & Eines de Taller (41-50)
-    { num: 41, name: "NVIDIA GeForce RTX 4090 24GB", rarity: "epic", cat: "hardware", desc: "La GPU d'escriptori més potent amb 16.384 nuclis CUDA i arquitectura Ada Lovelace." , imageUrl: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&auto=format&fit=crop&q=80" },
-    { num: 42, name: "AMD Radeon RX 7900 XTX 24GB", rarity: "common", cat: "hardware", desc: "Targeta gràfica amb disseny de chiplets RDNA 3 i tecnologia DisplayPort 2.1." , imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80" },
-    { num: 43, name: "NVIDIA GeForce RTX 4060 8GB", rarity: "common", cat: "hardware", desc: "Targeta gràfica eficient per a resolució 1080p amb suport DLSS 3 Frame Generation." , imageUrl: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&auto=format&fit=crop&q=80" },
-    { num: 44, name: "Polsera Antiestàtica ESD", rarity: "common", cat: "hardware", desc: "Protecció obligatòria de taller que deriva l'electricitat estàtica a presa de terra." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-    { num: 45, name: "Tornavís Imantat Phillips PH2", rarity: "common", cat: "hardware", desc: "L'eina bàsica indispensable per al caragolat segur de plaques i fonts a la caixa." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-    { num: 46, name: "Multímetre Digital True RMS", rarity: "uncommon", cat: "hardware", desc: "Instrument per mesurar tensions contínues (+12V, +5V, +3.3V) a la font d'alimentació." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-    { num: 47, name: "Tester de Fonts d'Alimentació ATX", rarity: "common", cat: "hardware", desc: "Comprovador ràpid amb pantalla LCD dels rails de voltatge i del senyal Power Good." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-    { num: 48, name: "Targeta de Diagnòstic PCI POST", rarity: "common", cat: "hardware", desc: "Dispositiu amb visualitzador hexadecimal per detectar codis d'error d'arrencada." , imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
-    { num: 49, name: "Alcohol Isopropílic 99.9%", rarity: "common", cat: "hardware", desc: "Solvent de neteja d'evaporació ràpida ideal per retirar pasta tèrmica ressecada." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-    { num: 50, name: "Valisa d'Eines del Tècnic SMIX", rarity: "common", cat: "hardware", desc: "Equip complet professional de claus, extractors, alicates i pinces de precisió." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
   ];
 
-  for (const c of cardsAlbum1Data) {
+  for (const c of cards_album_smix_m01_hardware_data) {
     const pageNum = Math.ceil(c.num / 10);
-    const page = album1Pages[pageNum - 1];
+    const page = pages_album_smix_m01_hardware[pageNum - 1];
     const rarity = getRarity(c.rarity);
     const category = getCategory(c.cat);
 
     await prisma.card.upsert({
-      where: { albumId_number: { albumId: album1.id, number: c.num } },
+      where: { albumId_number: { albumId: "album-smix-m01-hardware", number: c.num } },
       update: {
         name: c.name,
         description: c.desc,
@@ -289,7 +251,7 @@ async function main() {
         value: rarity.sortOrder * 20,
       },
       create: {
-        albumId: album1.id,
+        albumId: "album-smix-m01-hardware",
         pageId: page.id,
         number: c.num,
         name: c.name,
@@ -301,38 +263,38 @@ async function main() {
       },
     });
   }
-  console.log("✅ Àlbum 1 (Hardware SMIX M01): 50 cromos creats!");
+  console.log("✅ Àlbum album-smix-m01-hardware: 20 cromos creats!");
+
 
   // ========================================================
-  // 7. ÀLBUM 2: Xarxes Locals & Sistemes Operatius (SMIX M02/M05) - 50 CROMOS
+  // ÀLBUM: M02: Sistemes Operatius Monolloc (album-smix-m02-som) - 20 CROMOS
   // ========================================================
-  const album2 = await prisma.album.upsert({
-    where: { id: "album-smix-m02-m05-xarxes" },
+  const album_smix_m02_som = await prisma.album.upsert({
+    where: { id: "album-smix-m02-som" },
     update: {
-      name: "Xarxes Locals & Sistemes Operatius (SMIX M02/M05)",
-      description: "Col·lecció de 50 cromos sobre Linux, Windows Server, cablejat estructurat, adreçament IP i protocols de xarxa.",
-      totalCards: 50,
+      name: "M02: Sistemes Operatius Monolloc",
+      description: "Col·lecció sobre Linux d'escriptori, Windows 10/11, comandes bash, gestió de processos, particionament i virtualització.",
+      totalCards: 20,
       sortOrder: 2,
       isActive: true,
     },
     create: {
-      id: "album-smix-m02-m05-xarxes",
-      name: "Xarxes Locals & Sistemes Operatius (SMIX M02/M05)",
-      description: "Col·lecció de 50 cromos sobre Linux, Windows Server, cablejat estructurat, adreçament IP i protocols de xarxa.",
-      totalCards: 50,
+      id: "album-smix-m02-som",
+      name: "M02: Sistemes Operatius Monolloc",
+      description: "Col·lecció sobre Linux d'escriptori, Windows 10/11, comandes bash, gestió de processos, particionament i virtualització.",
+      totalCards: 20,
       sortOrder: 2,
       isActive: true,
     },
   });
 
-  // Crear 5 pàgines per a l'Àlbum 2
-  const album2Pages = await Promise.all(
-    Array.from({ length: 5 }).map((_, i) =>
+  const pages_album_smix_m02_som = await Promise.all(
+    Array.from({ length: 2 }).map((_, i) =>
       prisma.albumPage.upsert({
-        where: { albumId_pageNum: { albumId: album2.id, pageNum: i + 1 } },
+        where: { albumId_pageNum: { albumId: "album-smix-m02-som", pageNum: i + 1 } },
         update: { layout: "grid-5x2" },
         create: {
-          albumId: album2.id,
+          albumId: "album-smix-m02-som",
           pageNum: i + 1,
           layout: "grid-5x2",
         },
@@ -340,77 +302,39 @@ async function main() {
     )
   );
 
-  // 50 cromos per a l'Àlbum 2
-  const cardsAlbum2Data = [
-    // Pàgina 1: Comandaments Linux & Kernel (1-10)
-    { num: 1, name: "Kernel Linux Monolític", rarity: "legendary", cat: "so-linux-windows", desc: "Nucli del sistema operatiu que gestiona la CPU, la memòria i els dispositius mitjançant mòduls." , imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
-    { num: 2, name: "GNU Bash Shell", rarity: "uncommon", cat: "so-linux-windows", desc: "Intèrpret d'ordres estàndard de la majoria de distribucions GNU/Linux amb suport de scripts." , imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
-    { num: 3, name: "Comandament sudo (SuperUser DO)", rarity: "common", cat: "so-linux-windows", desc: "Permet a usuaris autoritzats executar ordres amb privilegis de superusuari root." , imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
-    { num: 4, name: "Permisos Octals chmod 755", rarity: "uncommon", cat: "so-linux-windows", desc: "Assigna lectura, escriptura i execució al propietari, i lectura/execució al grup i altres." , imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
-    { num: 5, name: "Comandament grep & Regex", rarity: "common", cat: "so-linux-windows", desc: "Utilitat fonamental de línia d'ordres per cercar patrons de text mitjançant expressions regulars." , imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
-    { num: 6, name: "Gestor de Serveis systemd (systemctl)", rarity: "common", cat: "so-linux-windows", desc: "Sistema d'inici i gestor de serveis que controla dimonis, unitats i arrencada en paral·lel." , imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
-    { num: 7, name: "Gestor de Paquets APT & dpkg", rarity: "common", cat: "so-linux-windows", desc: "Eines per a instal·lació, actualització i resolució automàtica de dependències a Debian/Ubuntu." , imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
-    { num: 8, name: "Enllaç Simbòlic (ln -s)", rarity: "common", cat: "so-linux-windows", desc: "Fitxer especial que fa d'accés directe apuntant a la ruta d'un altre fitxer o directori." , imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
-    { num: 9, name: "Protocol Gràfic Wayland", rarity: "common", cat: "so-linux-windows", desc: "Servidor de visualització modern i segur que substitueix el clàssic servidor X11 a Linux." , imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
-    { num: 10, name: "Distribució Debian GNU/Linux", rarity: "common", cat: "so-linux-windows", desc: "El 'sistema operatiu universal', base sòlida i estable d'Ubuntu, Linux Mint i Kali." , imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+  const cards_album_smix_m02_som_data = [
 
-    // Pàgina 2: Windows & Active Directory (11-20)
-    { num: 11, name: "PowerShell Core 7", rarity: "uncommon", cat: "so-linux-windows", desc: "Intèrpret de comandes basat en objectes .NET per a automatització i administració avançada." , imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
-    { num: 12, name: "Registre del Sistema de Windows (regedit)", rarity: "common", cat: "so-linux-windows", desc: "Base de dades jeràrquica centralitzada que emmagatzema paràmetres del sistema i programes." , imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
-    { num: 13, name: "Directives de Grup (GPO)", rarity: "common", cat: "so-linux-windows", desc: "Conjunt de regles que permeten als administradors configurar equips i usuaris de manera massiva." , imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
-    { num: 14, name: "Sistema de Fitxers NTFS & Llistes ACL", rarity: "common", cat: "so-linux-windows", desc: "Sistema de fitxers de Windows amb suport de permisos d'usuari granulars, xifrat i quotes." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 15, name: "Visor d'Esdeveniments (Event Viewer)", rarity: "common", cat: "so-linux-windows", desc: "Eina per diagnosticar errors de maquinari, seguretat i aplicacions als registres del sistema." , imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
-    { num: 16, name: "Sysinternals Process Explorer", rarity: "common", cat: "so-linux-windows", desc: "Monitor avançat de processos que mostra les DLLs carregades i identificadors oberts." , imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
-    { num: 17, name: "Windows Subsystem for Linux (WSL2)", rarity: "common", cat: "so-linux-windows", desc: "Capa que executa un nucli Linux autèntic dins de Windows mitjançant virtualització lleugera." , imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
-    { num: 18, name: "Control de Comptes d'Usuari (UAC)", rarity: "common", cat: "so-linux-windows", desc: "Mecanisme de seguretat que demana confirmació abans de concedir privilegis administratius." , imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
-    { num: 19, name: "Active Directory Domain Services (AD DS)", rarity: "rare", cat: "so-linux-windows", desc: "Directori centralitzat d'identitats per a la gestió d'usuaris, equips i polítiques en xarxa." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 20, name: "Administrador de Tasques de Windows", rarity: "common", cat: "so-linux-windows", desc: "Utilitat ràpida per visualitzar consum de CPU, RAM, disc, xarxa i finalitzar processos penjats." , imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 1, name: "Kernel Linux Monolític", rarity: "legendary", cat: "so-linux-windows", desc: "Nucli del sistema operatiu que gestiona recursos de CPU, RAM i dispositius.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 2, name: "GNU Bash Shell", rarity: "uncommon", cat: "so-linux-windows", desc: "Intèrpret d'ordres per defecte a sistemes GNU/Linux amb capacitats d'scripting.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 3, name: "Comandament sudo", rarity: "common", cat: "so-linux-windows", desc: "Executa ordres amb privilegis administratius de superusuari (root).", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 4, name: "Permisos chmod 755", rarity: "uncommon", cat: "so-linux-windows", desc: "Lectura, escriptura i execució per al propietari; lectura i execució per als altres.", imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
+    { num: 5, name: "Comanda grep & Regex", rarity: "common", cat: "so-linux-windows", desc: "Filtre avançat de text mitjançant l'ús d'expressions regulars.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 6, name: "Gestor de Serveis systemd", rarity: "common", cat: "so-linux-windows", desc: "Dimoni d'inici i control de serveis en segon pla mitjançant systemctl.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 7, name: "Gestor APT & dpkg", rarity: "common", cat: "so-linux-windows", desc: "Eina de paquets per instal·lar i resoldre dependències a sistemes Debian.", imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
+    { num: 8, name: "Enllaç Simbòlic ln -s", rarity: "common", cat: "so-linux-windows", desc: "Fitxer d'accés directe que apunta a una altra ruta del sistema de fitxers.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 9, name: "Distribució Debian GNU/Linux", rarity: "rare", cat: "so-linux-windows", desc: "El sistema operatiu universal que serveix de base per a Ubuntu i Linux Mint.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 10, name: "Registre de Windows (Regedit)", rarity: "common", cat: "so-linux-windows", desc: "Base de dades jeràrquica centralitzada de configuracions del sistema Windows.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 11, name: "Administrador de Tasques", rarity: "common", cat: "so-linux-windows", desc: "Monitor gràfic del rendiment de processos, CPU, disc i xarxa.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 12, name: "PowerShell 7", rarity: "uncommon", cat: "so-linux-windows", desc: "Entorn de línia d'ordres orientat a objectes per a automatització a Windows.", imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
+    { num: 13, name: "Taula de Particions GPT", rarity: "common", cat: "so-linux-windows", desc: "Estandard modern amb suport per a discs de més de 2TB i arrencada UEFI segura.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 14, name: "VirtualBox & Màquines Virtuals", rarity: "rare", cat: "so-linux-windows", desc: "Hipervisor de tipus 2 per crear i provar laboratoris de sistemes operatius.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 15, name: "Format del Disc NTFS", rarity: "common", cat: "so-linux-windows", desc: "Sistema de fitxers de Windows amb suport de llistes ACL, xifrat i journaling.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 16, name: "Ext4 Journalling Filesystem", rarity: "common", cat: "so-linux-windows", desc: "Sistema de fitxers per defecte a GNU/Linux amb registre de transaccions segur.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 17, name: "Controlador de Dispositius (Driver)", rarity: "common", cat: "so-linux-windows", desc: "Programari que permet al nucli comunicar-se amb el maquinari físic.", imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80" },
+    { num: 18, name: "Arrencada Dual GRUB 2", rarity: "uncommon", cat: "so-linux-windows", desc: "Gestor d'arrencada múltiple que permet escollir entre Linux i Windows a l'inici.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 19, name: "Sysinternals Suite", rarity: "rare", cat: "so-linux-windows", desc: "Col·lecció d'eines avançades de diagnòstic de processos i fitxers a Windows.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 20, name: "Imatge ISO i Eina Rufus", rarity: "common", cat: "so-linux-windows", desc: "Creació de memòries USB autoarrencables per a la instal·lació neta de sistemes.", imageUrl: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80" },
 
-    // Pàgina 3: Cablejat & Capa Física de Xarxa (21-30)
-    { num: 21, name: "Cable de Parell Trenat Cat 6A UTP", rarity: "common", cat: "xarxes", desc: "Cable de 4 parells trenats de coure certificat per a transmissions de 10 Gbps fins a 100 metres." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 22, name: "Connector Modular RJ-45", rarity: "common", cat: "xarxes", desc: "Connector de 8 pins (8P8C) emprat habitualment en xarxes Ethernet sota norma T568B." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 23, name: "Eina de Crimpador RJ-45", rarity: "common", cat: "xarxes", desc: "Tenalla de pressió per fixar les fulles de coure del connector als fils del cable de xarxa." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-    { num: 24, name: "Cable de Fibra Òptica Monomode (SMF)", rarity: "uncommon", cat: "xarxes", desc: "Fibra amb nucli de 9 micres que permet transmetre làser a desenes de quilòmetres sense pèrdua." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 25, name: "Cable de Fibra Òptica Multimode (MMF)", rarity: "common", cat: "xarxes", desc: "Fibra amb nucli de 50/62.5 micres que transmet senyal LED en distàncies curtes de CPD." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 26, name: "Mòdul Transceptor SFP+ 10Gbps", rarity: "epic", cat: "xarxes", desc: "Adaptador connectable en calent per interconnectar switches mitjançant fibra òptica." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 27, name: "Switch Gestionable de Nivell 2", rarity: "rare", cat: "xarxes", desc: "Commutador capaç de reenviar trames segons l'adreça MAC i configurar VLANs i QoS." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 28, name: "Patch Panel de 24 Ports Cat 6", rarity: "uncommon", cat: "xarxes", desc: "Panell de pegat on s'insereixen els cables que arriben de les rosetes mitjançant eina d'impacte." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 29, name: "Armari Rack de 19 Polzades", rarity: "common", cat: "xarxes", desc: "Estructura metàl·lica estandarditzada per a allotjament de servidors, switches i SAI." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 30, name: "Comprovador de Continuïtat Tester RJ-45", rarity: "common", cat: "xarxes", desc: "Dispositiu de leds que verifica la continuïtat i el mapa de connexions dels 8 fils del cable." , imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
-
-    // Pàgina 4: Adreçament IP & Protocols (31-40)
-    { num: 31, name: "Format d'Adreçament IPv4", rarity: "common", cat: "xarxes", desc: "Adreça lògica de 32 bits representada en 4 octets decimals com ara 192.168.1.1." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 32, name: "Rangs d'IPs Privades RFC 1918", rarity: "common", cat: "xarxes", desc: "Adreces reservades per a xarxes locals (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) no enrutables a Internet." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 33, name: "Màscara de Subxarxa & Notació CIDR /24", rarity: "uncommon", cat: "xarxes", desc: "Delimita quina part de l'adreça IP correspon a la xarxa (24 bits) i quina als equips (8 bits)." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 34, name: "Protocol d'Adreçament IPv6 (128 bits)", rarity: "common", cat: "xarxes", desc: "Protocol successor d'IPv4 amb format hexadecimal i espai d'adreces pràcticament infinit." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 35, name: "Protocol de Resolució d'Adreces (ARP)", rarity: "common", cat: "xarxes", desc: "Tradueix adreces de xarxa IPv4 a adreces físiques MAC a la xarxa local." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 36, name: "Protocol ICMP & Comandament Ping", rarity: "common", cat: "xarxes", desc: "Envia missatges Echo Request per verificar la connectivitat i mesurar la latència RTT." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 37, name: "Protocol DHCP (Procés DORA)", rarity: "uncommon", cat: "xarxes", desc: "Assignació automàtica de configuració IP mitjançant Discover, Offer, Request i Acknowledge." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 38, name: "Comandament Traceroute / Tracert", rarity: "common", cat: "xarxes", desc: "Descobreix els routers intermedis que travessa un paquet incrementant el valor TTL." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 39, name: "Protocol TCP (Three-Way Handshake)", rarity: "common", cat: "xarxes", desc: "Protocol orientat a connexió amb control de flux que estableix sessions amb SYN, SYN-ACK, ACK." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 40, name: "Protocol de Datagrames UDP", rarity: "common", cat: "xarxes", desc: "Protocol ràpid sense connexió ideal per a streaming de vídeo en directe, jocs online i DNS." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-
-    // Pàgina 5: Serveis de Xarxa & Ciberseguretat (41-50)
-    { num: 41, name: "Sistema de Noms de Domini (DNS Port 53)", rarity: "common", cat: "serveis-web", desc: "Resolució jeràrquica que tradueix noms de domini llegibles (ex. lacetania.cat) a adreces IP." , imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
-    { num: 42, name: "Protocol Segur SSH (Port 22)", rarity: "common", cat: "serveis-web", desc: "Canal xifrat per gestionar terminals remotes i transferir fitxers amb claus asimètriques." , imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
-    { num: 43, name: "Xarxes Virtuals VLAN 802.1Q", rarity: "uncommon", cat: "xarxes", desc: "Segmentació lògica de dominis de difusió broadcast dins d'un mateix switch físic." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 44, name: "Enllaç Troncal Trunk 802.1Q", rarity: "common", cat: "xarxes", desc: "Port d'interconnexió entre switches que etiqueta i transporta el trànsit de múltiples VLANs." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 45, name: "Analitzador de Paquets Wireshark", rarity: "rare", cat: "seguretat", desc: "Eina fonamental per inspeccionar trames i paquets capturats en temps real a la targeta de xarxa." , imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
-    { num: 46, name: "Tallafoc de Paquets Iptables / Nftables", rarity: "common", cat: "seguretat", desc: "Filtre del nucli de Linux que permet acceptar, rebutjar o fer NAT de paquets de xarxa." , imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
-    { num: 47, name: "Servidor Web Nginx (HTTP/HTTPS)", rarity: "uncommon", cat: "serveis-web", desc: "Servidor web d'alt rendiment i proxy invers asíncron lleuger basat en esdeveniments." , imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
-    { num: 48, name: "Protocol de Xifrat TLS 1.3", rarity: "common", cat: "seguretat", desc: "Capa de transport xifrada moderna que garanteix privacitat i integritat a HTTPS." , imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
-    { num: 49, name: "Model OSI de 7 Capes de la ISO", rarity: "common", cat: "xarxes", desc: "Física, Enllaç, Xarxa, Transport, Sessió, Presentació i Aplicació: la base de les telecomunicacions." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
-    { num: 50, name: "Router d'Accés per Fibra FTTH", rarity: "common", cat: "xarxes", desc: "Equip terminal de xarxa òptica (ONT/Router) que commuta paquets entre la WAN i la xarxa LAN local." , imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
   ];
 
-  for (const c of cardsAlbum2Data) {
+  for (const c of cards_album_smix_m02_som_data) {
     const pageNum = Math.ceil(c.num / 10);
-    const page = album2Pages[pageNum - 1];
+    const page = pages_album_smix_m02_som[pageNum - 1];
     const rarity = getRarity(c.rarity);
     const category = getCategory(c.cat);
 
     await prisma.card.upsert({
-      where: { albumId_number: { albumId: album2.id, number: c.num } },
+      where: { albumId_number: { albumId: "album-smix-m02-som", number: c.num } },
       update: {
         name: c.name,
         description: c.desc,
@@ -421,7 +345,7 @@ async function main() {
         value: rarity.sortOrder * 20,
       },
       create: {
-        albumId: album2.id,
+        albumId: "album-smix-m02-som",
         pageId: page.id,
         number: c.num,
         name: c.name,
@@ -433,9 +357,479 @@ async function main() {
       },
     });
   }
-  console.log("✅ Àlbum 2 (Xarxes & SO SMIX M02/M05): 50 cromos creats!");
+  console.log("✅ Àlbum album-smix-m02-som: 20 cromos creats!");
+
 
   // ========================================================
+  // ÀLBUM: M03: Aplicacions Ofimàtiques (album-smix-m03-ofimatica) - 20 CROMOS
+  // ========================================================
+  const album_smix_m03_ofimatica = await prisma.album.upsert({
+    where: { id: "album-smix-m03-ofimatica" },
+    update: {
+      name: "M03: Aplicacions Ofimàtiques",
+      description: "Col·lecció sobre processadors de textos, fulls de càlcul (Excel/Calc), bases de dades relacionals, presentacions i eines col·laboratives.",
+      totalCards: 20,
+      sortOrder: 3,
+      isActive: true,
+    },
+    create: {
+      id: "album-smix-m03-ofimatica",
+      name: "M03: Aplicacions Ofimàtiques",
+      description: "Col·lecció sobre processadors de textos, fulls de càlcul (Excel/Calc), bases de dades relacionals, presentacions i eines col·laboratives.",
+      totalCards: 20,
+      sortOrder: 3,
+      isActive: true,
+    },
+  });
+
+  const pages_album_smix_m03_ofimatica = await Promise.all(
+    Array.from({ length: 2 }).map((_, i) =>
+      prisma.albumPage.upsert({
+        where: { albumId_pageNum: { albumId: "album-smix-m03-ofimatica", pageNum: i + 1 } },
+        update: { layout: "grid-5x2" },
+        create: {
+          albumId: "album-smix-m03-ofimatica",
+          pageNum: i + 1,
+          layout: "grid-5x2",
+        },
+      })
+    )
+  );
+
+  const cards_album_smix_m03_ofimatica_data = [
+
+    { num: 1, name: "Microsoft Excel - Fórmules VLOOKUP / XLOOKUP", rarity: "legendary", cat: "ofimatica", desc: "Funció fonamental de cerca matricial en taules de dades i fulls de càlcul.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 2, name: "Taules Dinàmiques (Pivot Tables)", rarity: "epic", cat: "ofimatica", desc: "Eina d'agregació i anàlisi multidimensional de grans volums de dades.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 3, name: "Format Condicional en Fulls", rarity: "common", cat: "ofimatica", desc: "Ressaltat automàtic de cel·les basat en criteris matemàtics o de text.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 4, name: "Suita LibreOffice Open Source", rarity: "rare", cat: "ofimatica", desc: "Paquet ofimàtic lliure format per Writer, Calc, Impress, Draw i Base.", imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
+    { num: 5, name: "Combinació de Correspondència (Mail Merge)", rarity: "uncommon", cat: "ofimatica", desc: "Generació massiva de documents personalitzats a partir d'una base de dades.", imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&auto=format&fit=crop&q=80" },
+    { num: 6, name: "Estils de Paràgraf i Taula de Continguts", rarity: "common", cat: "ofimatica", desc: "Estructuració jeràrquica de documents llargs amb índexs automàtics.", imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&auto=format&fit=crop&q=80" },
+    { num: 7, name: "Bases de Dades Microsoft Access / Base", rarity: "uncommon", cat: "ofimatica", desc: "SGBD d'escriptori amb taules relacionades, formularis, consultes i informes.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 8, name: "Clau Primària i Integritat Referencial", rarity: "common", cat: "ofimatica", desc: "Identificador únic d'un registre i regles que impedeixen dades orfes.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 9, name: "Llenguatge de Macros VBA", rarity: "rare", cat: "ofimatica", desc: "Automatització avançada de processos repetitius mitjançant codi a Office.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 10, name: "Format PDF/A de Preservació Digital", rarity: "common", cat: "ofimatica", desc: "Estàndard ISO per a l'arxiu i conservació a llarg termini de documents electrònics.", imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&auto=format&fit=crop&q=80" },
+    { num: 11, name: "Google Workspace & Edició Col·laborativa", rarity: "uncommon", cat: "ofimatica", desc: "Edició simultània en el núvol de documents, fulls i formularis en temps real.", imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80" },
+    { num: 12, name: "OCR - Reconeixement Òptic de Caràcters", rarity: "common", cat: "ofimatica", desc: "Conversió de documents escanejats i imatges en text editable i cercable.", imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&auto=format&fit=crop&q=80" },
+    { num: 13, name: "Gràfics de Dispersió i Tendència", rarity: "common", cat: "ofimatica", desc: "Representació visual per a la interpretació ràpida d'estadístiques i mètriques.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 14, name: "Validació de Dades en Cel·les", rarity: "common", cat: "ofimatica", desc: "Restricció d'entrada mitjançant llistes desplegables i regles de rang numèric.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 15, name: "Disseny de Diapositives Màster (Impress/PPT)", rarity: "common", cat: "ofimatica", desc: "Plantilla mare que unifica tipografies, fons i logotips de presentacions.", imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80" },
+    { num: 16, name: "Formularis Digitals i Enquestes", rarity: "common", cat: "ofimatica", desc: "Captura centralitzada de dades amb vinculació automàtica a fulls de càlcul.", imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80" },
+    { num: 17, name: "Compressió d'Arxius ZIP/7z", rarity: "common", cat: "ofimatica", desc: "Empaquetament de múltiples carpetes en un sol fitxer reduint el pes en bytes.", imageUrl: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?w=600&auto=format&fit=crop&q=80" },
+    { num: 18, name: "Signatura Digital de Documents", rarity: "uncommon", cat: "ofimatica", desc: "Mecanisme criptogràfic que garanteix l'autenticitat i la no alteració del document.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 19, name: "Gestor Bibliogràfic Zotero", rarity: "common", cat: "ofimatica", desc: "Eina d'organització i citació automàtica de fonts en format APA/IEEE.", imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&auto=format&fit=crop&q=80" },
+    { num: 20, name: "Tecles de Drecera Ràpida (Ctrl+C/V/Z)", rarity: "common", cat: "ofimatica", desc: "Combinacions fonamentals per a l'eficiència i agilitat davant del teclat.", imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80" },
+
+  ];
+
+  for (const c of cards_album_smix_m03_ofimatica_data) {
+    const pageNum = Math.ceil(c.num / 10);
+    const page = pages_album_smix_m03_ofimatica[pageNum - 1];
+    const rarity = getRarity(c.rarity);
+    const category = getCategory(c.cat);
+
+    await prisma.card.upsert({
+      where: { albumId_number: { albumId: "album-smix-m03-ofimatica", number: c.num } },
+      update: {
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        pageId: page.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+      create: {
+        albumId: "album-smix-m03-ofimatica",
+        pageId: page.id,
+        number: c.num,
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+    });
+  }
+  console.log("✅ Àlbum album-smix-m03-ofimatica: 20 cromos creats!");
+
+
+  // ========================================================
+  // ÀLBUM: M04: Sistemes Operatius en Xarxa (album-smix-m04-sox) - 20 CROMOS
+  // ========================================================
+  const album_smix_m04_sox = await prisma.album.upsert({
+    where: { id: "album-smix-m04-sox" },
+    update: {
+      name: "M04: Sistemes Operatius en Xarxa",
+      description: "Col·lecció sobre servidors Windows Server, Active Directory, GPO, servidors Linux en xarxa, SAMBA i virtualització empresarial.",
+      totalCards: 20,
+      sortOrder: 4,
+      isActive: true,
+    },
+    create: {
+      id: "album-smix-m04-sox",
+      name: "M04: Sistemes Operatius en Xarxa",
+      description: "Col·lecció sobre servidors Windows Server, Active Directory, GPO, servidors Linux en xarxa, SAMBA i virtualització empresarial.",
+      totalCards: 20,
+      sortOrder: 4,
+      isActive: true,
+    },
+  });
+
+  const pages_album_smix_m04_sox = await Promise.all(
+    Array.from({ length: 2 }).map((_, i) =>
+      prisma.albumPage.upsert({
+        where: { albumId_pageNum: { albumId: "album-smix-m04-sox", pageNum: i + 1 } },
+        update: { layout: "grid-5x2" },
+        create: {
+          albumId: "album-smix-m04-sox",
+          pageNum: i + 1,
+          layout: "grid-5x2",
+        },
+      })
+    )
+  );
+
+  const cards_album_smix_m04_sox_data = [
+
+    { num: 1, name: "Active Directory Domain Services (AD DS)", rarity: "legendary", cat: "so-linux-windows", desc: "Directori centralitzat corporatiu per a la gestió d'usuaris, equips i polítiques.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 2, name: "Controlador de Domini (DC)", rarity: "epic", cat: "so-linux-windows", desc: "Servidor que allotja la base de dades ntds.dit i valida les credencials del bosc.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 3, name: "Directives de Grup (GPO)", rarity: "rare", cat: "so-linux-windows", desc: "Polítiques de seguretat i configuració centralitzada aplicades a usuaris i equips.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 4, name: "Unitats Organitzatives (OU)", rarity: "common", cat: "so-linux-windows", desc: "Contenidors estructurals dins d'Active Directory per organitzar departaments.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 5, name: "Servidor de Fitxers SAMBA a Linux", rarity: "rare", cat: "so-linux-windows", desc: "Interoperabilitat del protocol SMB que permet compartir carpetes entre Linux i Windows.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 6, name: "Perfils Mòbils d'Usuari (Roaming Profiles)", rarity: "uncommon", cat: "so-linux-windows", desc: "Sincronització de l'escriptori i documents de l'usuari a qualsevol equip del domini.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 7, name: "Escriptori Remot RDP & Guacamole", rarity: "common", cat: "so-linux-windows", desc: "Accés gràfic remot a servidors mitjançant el port TCP 3389.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 8, name: "Protocol d'Autenticació Kerberos", rarity: "epic", cat: "so-linux-windows", desc: "Mecanisme de seguretat basat en tiquets que evita l'enviament de contrasenyes en text pla.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 9, name: "Servidor d'Impressió en Xarxa", rarity: "common", cat: "so-linux-windows", desc: "Cues centralitzades i desplegament automàtic de controladors d'impressores per GPO.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 10, name: "Hyper-V & Proxmox VE", rarity: "rare", cat: "so-linux-windows", desc: "Hipervisors de tipus 1 per al desplegament de servidors virtualitzats d'alt rendiment.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 11, name: "NFS - Network File System", rarity: "common", cat: "so-linux-windows", desc: "Protocol natiu per compartir sistemes de fitxers en xarxa entre entorns UNIX/Linux.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 12, name: "Quotes de Disc NTFS", rarity: "common", cat: "so-linux-windows", desc: "Límit d'emmagatzematge assignat a cada usuari per evitar el col·lapse de servidors.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 13, name: "Replicació DFS (Distributed File System)", rarity: "uncommon", cat: "so-linux-windows", desc: "Espai de noms unificat i sincronització de carpetes compartides entre seus remotes.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 14, name: "Còpies d'Ombra de Volum (VSS)", rarity: "common", cat: "so-linux-windows", desc: "Instantànies puntuals que permeten recuperar versions anteriors de fitxers suprimits.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 15, name: "Servidor WDS & PXE Network Boot", rarity: "uncommon", cat: "so-linux-windows", desc: "Instal·lació automatitzada de sistemes operatius a equips de la xarxa per cable.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 16, name: "Protocol LDAP / LDAPS", rarity: "uncommon", cat: "so-linux-windows", desc: "Consultes lleugeres al directori d'usuaris a través dels ports 389 i 636 xifrat.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 17, name: "PowerShell Remoting (Enter-PSSession)", rarity: "common", cat: "so-linux-windows", desc: "Gestió remota de servidors en línia d'ordres mitjançant serveis WinRM.", imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
+    { num: 18, name: "Servidor WSUS d'Actualitzacions", rarity: "common", cat: "so-linux-windows", desc: "Descàrrega i aprovació selectiva de pedaços de seguretat de Windows a la xarxa local.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 19, name: "Clúster d'Alta Disponibilitat (Failover)", rarity: "rare", cat: "so-linux-windows", desc: "Grup de servidors redundants que garanteixen el servei si un node cau.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 20, name: "Visor d'Esdeveniments Centralitzat", rarity: "common", cat: "so-linux-windows", desc: "Recollida i auditoria de registres d'inici de sessió i alertes de fallada de disc.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+
+  ];
+
+  for (const c of cards_album_smix_m04_sox_data) {
+    const pageNum = Math.ceil(c.num / 10);
+    const page = pages_album_smix_m04_sox[pageNum - 1];
+    const rarity = getRarity(c.rarity);
+    const category = getCategory(c.cat);
+
+    await prisma.card.upsert({
+      where: { albumId_number: { albumId: "album-smix-m04-sox", number: c.num } },
+      update: {
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        pageId: page.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+      create: {
+        albumId: "album-smix-m04-sox",
+        pageId: page.id,
+        number: c.num,
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+    });
+  }
+  console.log("✅ Àlbum album-smix-m04-sox: 20 cromos creats!");
+
+
+  // ========================================================
+  // ÀLBUM: M05: Xarxes Locals (album-smix-m05-xarxes) - 20 CROMOS
+  // ========================================================
+  const album_smix_m05_xarxes = await prisma.album.upsert({
+    where: { id: "album-smix-m05-xarxes" },
+    update: {
+      name: "M05: Xarxes Locals",
+      description: "Col·lecció sobre cablejat estructurat, model OSI, switches, VLANs, adreçament IPv4/IPv6, encaminament i xarxes Wi-Fi.",
+      totalCards: 20,
+      sortOrder: 5,
+      isActive: true,
+    },
+    create: {
+      id: "album-smix-m05-xarxes",
+      name: "M05: Xarxes Locals",
+      description: "Col·lecció sobre cablejat estructurat, model OSI, switches, VLANs, adreçament IPv4/IPv6, encaminament i xarxes Wi-Fi.",
+      totalCards: 20,
+      sortOrder: 5,
+      isActive: true,
+    },
+  });
+
+  const pages_album_smix_m05_xarxes = await Promise.all(
+    Array.from({ length: 2 }).map((_, i) =>
+      prisma.albumPage.upsert({
+        where: { albumId_pageNum: { albumId: "album-smix-m05-xarxes", pageNum: i + 1 } },
+        update: { layout: "grid-5x2" },
+        create: {
+          albumId: "album-smix-m05-xarxes",
+          pageNum: i + 1,
+          layout: "grid-5x2",
+        },
+      })
+    )
+  );
+
+  const cards_album_smix_m05_xarxes_data = [
+
+    { num: 1, name: "Cable de Parell Trenat Cat 6A UTP", rarity: "common", cat: "xarxes", desc: "Cable de 4 parells de coure certificat per a 10 Gbps fins a 100 metres.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 2, name: "Connector Modular RJ-45 & Crimpador", rarity: "common", cat: "xarxes", desc: "Connector 8P8C sota norma T568B utilitzat en enllaços Ethernet.", imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
+    { num: 3, name: "Fibra Òptica Monomode (SMF)", rarity: "rare", cat: "xarxes", desc: "Nucli de 9 micres que permet transmissió làser de llarga distància sense pèrdues.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 4, name: "Switch de Nivell 2 Gestionable", rarity: "epic", cat: "xarxes", desc: "Commutador que reenvia trames per adreça MAC i permet crear xarxes VLAN.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 5, name: "Patch Panel & Armari Rack 19", rarity: "common", cat: "xarxes", desc: "Panell de terminació de cablejat instal·lat al rack de telecomunicacions.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 6, name: "Tester de Continuïtat RJ-45", rarity: "common", cat: "xarxes", desc: "Comprovador de leds per verificar el mapa de connexions dels 8 fils.", imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" },
+    { num: 7, name: "Adreçament IPv4 & Classes RFC 1918", rarity: "common", cat: "xarxes", desc: "Rangs d'adreces privades (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16).", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 8, name: "Màscara de Subxarxa CIDR /24", rarity: "uncommon", cat: "xarxes", desc: "Delimita els 24 bits de xarxa i els 8 bits d'equips (254 hosts útils).", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 9, name: "Adreçament IPv6 de 128 Bits", rarity: "rare", cat: "xarxes", desc: "Protocol global successor d'IPv4 amb notació hexadecimal i autoconfiguració SLAAC.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 10, name: "Protocol ARP (Address Resolution Protocol)", rarity: "common", cat: "xarxes", desc: "Descobreix l'adreça MAC associada a una IP dins de la mateixa subxarxa.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 11, name: "Protocol ICMP & Ordre Ping", rarity: "common", cat: "xarxes", desc: "Comprovació de connectivitat d'extrem a extrem mitjançant missatges Echo.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 12, name: "Xarxes Virtuals VLAN IEEE 802.1Q", rarity: "legendary", cat: "xarxes", desc: "Segmentació lògica del domini de difusió broadcast dins d'un mateix switch.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 13, name: "Port Troncal (Trunk 802.1Q)", rarity: "uncommon", cat: "xarxes", desc: "Enllaç entre commutadors que transporta trames etiquetades de múltiples VLANs.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 14, name: "Punt d'Accés Wi-Fi 6 (802.11ax)", rarity: "rare", cat: "xarxes", desc: "Connectivitat sense fils d'alta velocitat amb canals de 160MHz i OFDMA.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 15, name: "Mòdul Transceptor SFP+ 10Gbps", rarity: "uncommon", cat: "xarxes", desc: "Connexió modular extraïble per interconnectar equips mitjançant fibra òptica.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 16, name: "Model OSI de 7 Capes", rarity: "epic", cat: "xarxes", desc: "Arquitectura teòrica de comunicacions: Física, Enllaç, Xarxa, Transport, Sessió, Presentació, Aplicació.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 17, name: "Protocol TCP (Handshake SYN-ACK)", rarity: "common", cat: "xarxes", desc: "Transport orientat a connexió i fiable amb comprovació d'entrega.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 18, name: "Protocol UDP de Datagrames", rarity: "common", cat: "xarxes", desc: "Transport ràpid sense connexió utilitzat en jocs, DNS i trucades VoIP.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 19, name: "Encaminador / Router Domèstic FTTH", rarity: "common", cat: "xarxes", desc: "Dispositiu de capa 3 que commuta paquets entre la xarxa local i Internet amb NAT.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 20, name: "Traceroute / Tracert", rarity: "common", cat: "xarxes", desc: "Diagnòstic de salts de xarxa mitjançant la manipulació del camp TTL del paquet.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+
+  ];
+
+  for (const c of cards_album_smix_m05_xarxes_data) {
+    const pageNum = Math.ceil(c.num / 10);
+    const page = pages_album_smix_m05_xarxes[pageNum - 1];
+    const rarity = getRarity(c.rarity);
+    const category = getCategory(c.cat);
+
+    await prisma.card.upsert({
+      where: { albumId_number: { albumId: "album-smix-m05-xarxes", number: c.num } },
+      update: {
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        pageId: page.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+      create: {
+        albumId: "album-smix-m05-xarxes",
+        pageId: page.id,
+        number: c.num,
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+    });
+  }
+  console.log("✅ Àlbum album-smix-m05-xarxes: 20 cromos creats!");
+
+
+  // ========================================================
+  // ÀLBUM: M06: Seguretat Informàtica (album-smix-m06-seguretat) - 20 CROMOS
+  // ========================================================
+  const album_smix_m06_seguretat = await prisma.album.upsert({
+    where: { id: "album-smix-m06-seguretat" },
+    update: {
+      name: "M06: Seguretat Informàtica",
+      description: "Col·lecció sobre tallafocs, criptografia, certificats digitals TLS, atacs informàtics, còpies de seguretat (3-2-1) i malware.",
+      totalCards: 20,
+      sortOrder: 6,
+      isActive: true,
+    },
+    create: {
+      id: "album-smix-m06-seguretat",
+      name: "M06: Seguretat Informàtica",
+      description: "Col·lecció sobre tallafocs, criptografia, certificats digitals TLS, atacs informàtics, còpies de seguretat (3-2-1) i malware.",
+      totalCards: 20,
+      sortOrder: 6,
+      isActive: true,
+    },
+  });
+
+  const pages_album_smix_m06_seguretat = await Promise.all(
+    Array.from({ length: 2 }).map((_, i) =>
+      prisma.albumPage.upsert({
+        where: { albumId_pageNum: { albumId: "album-smix-m06-seguretat", pageNum: i + 1 } },
+        update: { layout: "grid-5x2" },
+        create: {
+          albumId: "album-smix-m06-seguretat",
+          pageNum: i + 1,
+          layout: "grid-5x2",
+        },
+      })
+    )
+  );
+
+  const cards_album_smix_m06_seguretat_data = [
+
+    { num: 1, name: "Tallafocs de Paquets Iptables / Nftables", rarity: "legendary", cat: "seguretat", desc: "Mòdul del nucli de Linux que filtra, bloqueja o tradueix trànsit de xarxa.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 2, name: "Analitzador Wireshark", rarity: "epic", cat: "seguretat", desc: "Eina de captura i anàlisi forense de paquets de xarxa en temps real.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 3, name: "Criptografia Asimètrica RSA / ECC", rarity: "rare", cat: "seguretat", desc: "Parell de claus pública i privada per a xifrat i signatures digitals.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 4, name: "Certificat Digital & Autoritat CA", rarity: "uncommon", cat: "seguretat", desc: "Document criptogràfic X.509 emès per una autoritat de confiança com Let's Encrypt.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 5, name: "Estratègia de Backup 3-2-1", rarity: "rare", cat: "seguretat", desc: "3 còpies de dades, en 2 suports diferents, amb 1 còpia fora de la seu.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 6, name: "Atac de Phishing & Enginyeria Social", rarity: "common", cat: "seguretat", desc: "Suplantació d'identitat per enganyar usuaris i robar credencials bancàries.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 7, name: "Ransomware & Xifrat Maliciós", rarity: "epic", cat: "seguretat", desc: "Malware que segresta fitxers exigint un rescat econòmic en criptomonedes.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 8, name: "Autenticació de Doble Factor (2FA/MFA)", rarity: "uncommon", cat: "seguretat", desc: "Capa addicional de seguretat mitjançant codis TOTP temporals al mòbil.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 9, name: "Escàner de Vulnerabilitats Nmap", rarity: "rare", cat: "seguretat", desc: "Eina d'auditoria que escaneja ports oberts i detecta versions de serveis actius.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 10, name: "Xifratge de Disc BitLocker / LUKS", rarity: "uncommon", cat: "seguretat", desc: "Protecció de dades en repòs que impedeix la lectura del disc si és sostret.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 11, name: "Atacs Man-in-the-Middle (MitM) & ARP Spoofing", rarity: "common", cat: "seguretat", desc: "Intercepció maliciosa de comunicacions entre dos equips de la xarxa local.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 12, name: "Funció Hash SHA-256 / SHA-3", rarity: "common", cat: "seguretat", desc: "Algorisme unidireccional que calcula l'empremta digital invariable d'un fitxer.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 13, name: "Sistema de Detecció d'Intrusions (Snort/Suricata)", rarity: "rare", cat: "seguretat", desc: "IDS/IPS que monitoritza alertes i anomalies en el flux de paquets.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 14, name: "Xarxa Privada Virtual (VPN WireGuard/OpenVPN)", rarity: "uncommon", cat: "seguretat", desc: "Túnel xifrat punt a punt per navegar de manera segura a través d'Internet.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 15, name: "Política de Contrasenyes Robustes", rarity: "common", cat: "seguretat", desc: "Requisits de complexitat, longitud mínima i caducitat periòdica.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 16, name: "Protecció contra Atacs de Denegació de Servei (DDoS)", rarity: "uncommon", cat: "seguretat", desc: "Mecanismes d'atenuació de trànsit massiu que intenta tombar servidors web.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 17, name: "Protocol TLS 1.3 per HTTPS", rarity: "common", cat: "seguretat", desc: "Substitut segur de SSL que xifra el trànsit de navegació web.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 18, name: "Llista de Control d'Accés (ACL)", rarity: "common", cat: "seguretat", desc: "Regles específiques que defineixen quins usuaris poden llegir o escriure un fitxer.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 19, name: "Protecció Antivirus / EDR d'Última Generació", rarity: "common", cat: "seguretat", desc: "Detecció d'amenaces en temps real basada en signatures i heurística de comportament.", imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80" },
+    { num: 20, name: "Destrucció Segura de Dades (Shred / Desmagnetització)", rarity: "common", cat: "seguretat", desc: "Sobreescriptura de zeros i uns per impedir la recuperació de dades sensibles.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+
+  ];
+
+  for (const c of cards_album_smix_m06_seguretat_data) {
+    const pageNum = Math.ceil(c.num / 10);
+    const page = pages_album_smix_m06_seguretat[pageNum - 1];
+    const rarity = getRarity(c.rarity);
+    const category = getCategory(c.cat);
+
+    await prisma.card.upsert({
+      where: { albumId_number: { albumId: "album-smix-m06-seguretat", number: c.num } },
+      update: {
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        pageId: page.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+      create: {
+        albumId: "album-smix-m06-seguretat",
+        pageId: page.id,
+        number: c.num,
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+    });
+  }
+  console.log("✅ Àlbum album-smix-m06-seguretat: 20 cromos creats!");
+
+
+  // ========================================================
+  // ÀLBUM: M07: Serveis de Xarxa (album-smix-m07-serveis) - 20 CROMOS
+  // ========================================================
+  const album_smix_m07_serveis = await prisma.album.upsert({
+    where: { id: "album-smix-m07-serveis" },
+    update: {
+      name: "M07: Serveis de Xarxa",
+      description: "Col·lecció sobre servidors DNS (BIND9), DHCP, servidors Web (Apache/Nginx), FTP/SFTP, correu electrònic (SMTP/IMAP) i proxy web.",
+      totalCards: 20,
+      sortOrder: 7,
+      isActive: true,
+    },
+    create: {
+      id: "album-smix-m07-serveis",
+      name: "M07: Serveis de Xarxa",
+      description: "Col·lecció sobre servidors DNS (BIND9), DHCP, servidors Web (Apache/Nginx), FTP/SFTP, correu electrònic (SMTP/IMAP) i proxy web.",
+      totalCards: 20,
+      sortOrder: 7,
+      isActive: true,
+    },
+  });
+
+  const pages_album_smix_m07_serveis = await Promise.all(
+    Array.from({ length: 2 }).map((_, i) =>
+      prisma.albumPage.upsert({
+        where: { albumId_pageNum: { albumId: "album-smix-m07-serveis", pageNum: i + 1 } },
+        update: { layout: "grid-5x2" },
+        create: {
+          albumId: "album-smix-m07-serveis",
+          pageNum: i + 1,
+          layout: "grid-5x2",
+        },
+      })
+    )
+  );
+
+  const cards_album_smix_m07_serveis_data = [
+
+    { num: 1, name: "Sistema de Noms de Domini (DNS Port 53)", rarity: "legendary", cat: "serveis-web", desc: "Servei essencial que tradueix noms de domini amigables a adreces IP.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 2, name: "Registres DNS (A, AAAA, CNAME, MX)", rarity: "epic", cat: "serveis-web", desc: "Entrades de zona: A per IPv4, AAAA per IPv6, CNAME per àlies i MX per correu.", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 3, name: "Servidor DNS BIND9 a Linux", rarity: "rare", cat: "serveis-web", desc: "El servidor de noms de codi obert més utilitzat a la xarxa global d'Internet.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 4, name: "Procés DORA de DHCP", rarity: "uncommon", cat: "serveis-web", desc: "Quatre etapes d'assignació d'IP: Discover, Offer, Request i Acknowledge.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 5, name: "Reserva d'IP estàtica per MAC al DHCP", rarity: "common", cat: "serveis-web", desc: "Assigna sempre la mateixa adreça IP a impressores o servidors de la xarxa.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 6, name: "Servidor Web Nginx & Proxy Invers", rarity: "rare", cat: "serveis-web", desc: "Servidor asíncron lleuger dissenyat per a milers de connexions simultànies.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 7, name: "Servidor Apache HTTP Server", rarity: "common", cat: "serveis-web", desc: "El clàssic servidor web modular basat en fitxers de configuració .htaccess.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 8, name: "Virtual Hosts Basats en Nom", rarity: "uncommon", cat: "serveis-web", desc: "Allotjament de múltiples dominis i llocs web independents en una sola IP física.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 9, name: "Protocol Segur SSH (Port 22)", rarity: "rare", cat: "serveis-web", desc: "Connexió remota xifrada amb autenticació per claus públiques ed25519.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 10, name: "Servidor FTP / SFTP (vsftpd)", rarity: "common", cat: "serveis-web", desc: "Transferència segura de fitxers sobre SSH evitant l'enviament de claus en pla.", imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
+    { num: 11, name: "Protocol SMTP de Correu (Port 25/587)", rarity: "common", cat: "serveis-web", desc: "Simple Mail Transfer Protocol utilitzat per enviar i enrutar missatges de correu.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 12, name: "Protocol IMAP & POP3 (Port 993/995)", rarity: "common", cat: "serveis-web", desc: "Recuperació de bústies de correu des de clients Outlook o Thunderbird.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+    { num: 13, name: "Servidor Proxy Squid & Memòria Cau Web", rarity: "uncommon", cat: "serveis-web", desc: "Filtratge de contingut web i acceleració d'accés mitjançant memòria cau.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 14, name: "Protocol de Temps de Xarxa (NTP Port 123)", rarity: "common", cat: "serveis-web", desc: "Sincronització de precisió del rellotge de tots els equips i servidors.", imageUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80" },
+    { num: 15, name: "Protocol SNMP & Monitoratge de Dispositius", rarity: "uncommon", cat: "serveis-web", desc: "Supervisió remota de l'estat de ports de switch, CPU i ús de memòria.", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" },
+    { num: 16, name: "Servidor de Veu IP Asterisk (SIP)", rarity: "rare", cat: "serveis-web", desc: "Centraleta telefònica IP de codi obert per gestionar trucades digitals.", imageUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80" },
+    { num: 17, name: "Balancejador de Càrrega HAProxy", rarity: "rare", cat: "serveis-web", desc: "Distribució equilibrada de peticions HTTP entrants entre múltiples nodes backend.", imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" },
+    { num: 18, name: "Fitxers de Zona DNS Directa i Inversa", rarity: "common", cat: "serveis-web", desc: "Resolució inversa que tradueix una adreça IP a nom de host (registres PTR).", imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80" },
+    { num: 19, name: "Contenidors Docker per a Serveis Lleugers", rarity: "legendary", cat: "serveis-web", desc: "Virtualització a nivell de sistema operatiu per aïllar serveis de xarxa.", imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&auto=format&fit=crop&q=80" },
+    { num: 20, name: "Ordres de Diagnòstic Dig i Nslookup", rarity: "common", cat: "serveis-web", desc: "Utilitats essencials per consultar registres i diagnosticar problemes de DNS.", imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80" },
+
+  ];
+
+  for (const c of cards_album_smix_m07_serveis_data) {
+    const pageNum = Math.ceil(c.num / 10);
+    const page = pages_album_smix_m07_serveis[pageNum - 1];
+    const rarity = getRarity(c.rarity);
+    const category = getCategory(c.cat);
+
+    await prisma.card.upsert({
+      where: { albumId_number: { albumId: "album-smix-m07-serveis", number: c.num } },
+      update: {
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        pageId: page.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+      create: {
+        albumId: "album-smix-m07-serveis",
+        pageId: page.id,
+        number: c.num,
+        name: c.name,
+        description: c.desc,
+        rarityId: rarity.id,
+        categoryId: category.id,
+        imageUrl: (c as any).imageUrl || null,
+        value: rarity.sortOrder * 20,
+      },
+    });
+  }
+  console.log("✅ Àlbum album-smix-m07-serveis: 20 cromos creats!");
+
+// ========================================================
   // 7b. ÀLBUM 3: Música Trista (Joan Dausà & Melangia) - 50 CROMOS
   // ========================================================
   const album3 = await prisma.album.upsert({
@@ -444,7 +838,7 @@ async function main() {
       name: "Música Trista",
       description: "Col·lecció de 50 cromos inspirada en les cançons, lletres, emocions i la trajectòria de Joan Dausà: des de 'Jo Mai Mai' i 'Judit' fins a 'Ara Som Gegants' i els grans concerts.",
       totalCards: 50,
-      sortOrder: 3,
+      sortOrder: 8,
       isActive: true,
     },
     create: {
@@ -452,7 +846,7 @@ async function main() {
       name: "Música Trista",
       description: "Col·lecció de 50 cromos inspirada en les cançons, lletres, emocions i la trajectòria de Joan Dausà: des de 'Jo Mai Mai' i 'Judit' fins a 'Ara Som Gegants' i els grans concerts.",
       totalCards: 50,
-      sortOrder: 3,
+      sortOrder: 8,
       isActive: true,
     },
   });
@@ -574,7 +968,7 @@ async function main() {
       name: "Música Bemparida",
       description: "Col·lecció de 50 cromos èpics dedicada a Rhapsody of Fire (Phapsody on Fire), els himnes 'Dawn of Victory' i 'Emerald Sword', i les grans llegendes del Power Metal simfònic.",
       totalCards: 50,
-      sortOrder: 4,
+      sortOrder: 9,
       isActive: true,
     },
     create: {
@@ -582,7 +976,7 @@ async function main() {
       name: "Música Bemparida",
       description: "Col·lecció de 50 cromos èpics dedicada a Rhapsody of Fire (Phapsody on Fire), els himnes 'Dawn of Victory' i 'Emerald Sword', i les grans llegendes del Power Metal simfònic.",
       totalCards: 50,
-      sortOrder: 4,
+      sortOrder: 9,
       isActive: true,
     },
   });
@@ -2551,13 +2945,20 @@ async function main() {
   // INICIALITZACIÓ SEGURA DE TOTES LES PREGUNTES
   // ========================================================
   const allQuestions = [
-    ...questionsSMIX.map((q) => ({
-      ...q,
-      albumId:
-        q.subjectSlug === "smix-m01-mme" || q.categorySlug === "hardware"
-          ? "album-smix-m01-hardware"
-          : "album-smix-m02-m05-xarxes",
-    })),
+    ...questionsSMIX.map((q) => {
+      let albumId = "album-smix-m01-hardware";
+      if (q.subjectSlug === "smix-m01-mme") albumId = "album-smix-m01-hardware";
+      else if (q.subjectSlug === "smix-m02-som") albumId = "album-smix-m02-som";
+      else if (q.subjectSlug === "smix-m03-ao") albumId = "album-smix-m03-ofimatica";
+      else if (q.subjectSlug === "smix-m04-sox") albumId = "album-smix-m04-sox";
+      else if (q.subjectSlug === "smix-m05-xl") albumId = "album-smix-m05-xarxes";
+      else if (q.subjectSlug === "smix-m06-si") albumId = "album-smix-m06-seguretat";
+      else if (q.subjectSlug === "smix-m07-sx") albumId = "album-smix-m07-serveis";
+      return {
+        ...q,
+        albumId,
+      };
+    }),
     ...questionsJoanDausa.map((q) => ({
       ...q,
       albumId: "album-musica-trista",

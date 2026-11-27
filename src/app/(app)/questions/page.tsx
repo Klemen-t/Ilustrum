@@ -429,8 +429,13 @@ export default function QuestionsPage() {
               {userAlbums.map((album) => {
                 const isMusicTrista = album.id.includes("musica-trista");
                 const isMusicPower = album.id.includes("musica-bemparida");
-                const isHardware = album.id.includes("hardware");
-                const isSistemes = album.id.includes("sistemes");
+                const isM01 = album.id.includes("m01");
+                const isM02 = album.id.includes("m02");
+                const isM03 = album.id.includes("m03");
+                const isM04 = album.id.includes("m04");
+                const isM05 = album.id.includes("m05") || album.id.includes("xarxes");
+                const isM06 = album.id.includes("m06") || album.id.includes("seguretat");
+                const isM07 = album.id.includes("m07") || album.id.includes("serveis");
 
                 let icon = "📚";
                 let badgeColor = "bg-indigo-500/10 border-indigo-500/30 text-indigo-300";
@@ -447,16 +452,41 @@ export default function QuestionsPage() {
                   badgeColor = "bg-amber-500/10 border-amber-500/30 text-amber-300";
                   gradient = "from-purple-950/80 to-amber-950/80";
                   bgCover = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80";
-                } else if (isHardware) {
+                } else if (isM01) {
                   icon = "🖥️";
+                  badgeColor = "bg-amber-500/10 border-amber-500/30 text-amber-300";
+                  gradient = "from-amber-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80";
+                } else if (isM02) {
+                  icon = "💻";
+                  badgeColor = "bg-blue-500/10 border-blue-500/30 text-blue-300";
+                  gradient = "from-blue-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=800&auto=format&fit=crop&q=80";
+                } else if (isM03) {
+                  icon = "📄";
                   badgeColor = "bg-cyan-500/10 border-cyan-500/30 text-cyan-300";
                   gradient = "from-cyan-950/80 to-slate-950/90";
-                  bgCover = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80";
-                } else if (isSistemes) {
+                  bgCover = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80";
+                } else if (isM04) {
+                  icon = "🖧";
+                  badgeColor = "bg-indigo-500/10 border-indigo-500/30 text-indigo-300";
+                  gradient = "from-indigo-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&auto=format&fit=crop&q=80";
+                } else if (isM05) {
                   icon = "🌐";
                   badgeColor = "bg-emerald-500/10 border-emerald-500/30 text-emerald-300";
                   gradient = "from-emerald-950/80 to-slate-950/90";
                   bgCover = "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80";
+                } else if (isM06) {
+                  icon = "🛡️";
+                  badgeColor = "bg-rose-500/10 border-rose-500/30 text-rose-300";
+                  gradient = "from-rose-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80";
+                } else if (isM07) {
+                  icon = "☁️";
+                  badgeColor = "bg-purple-500/10 border-purple-500/30 text-purple-300";
+                  gradient = "from-purple-950/80 to-slate-950/90";
+                  bgCover = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80";
                 }
 
                 return (

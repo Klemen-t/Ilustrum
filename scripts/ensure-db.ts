@@ -9,12 +9,13 @@ async function main() {
     const cardCount = await prisma.card.count();
     console.log(`📊 Cromos a la base de dades: ${cardCount}`);
 
+    const albumCount = await prisma.album.count();
     const trista = await prisma.album.findUnique({ where: { id: "album-musica-trista" } });
     const bemparida = await prisma.album.findUnique({ where: { id: "album-musica-bemparida" } });
     const questionsCount = await prisma.question.count();
     const questionsWithoutAlbum = await prisma.question.count({ where: { albumId: null } });
 
-    if (cardCount === 0 || !trista || !bemparida || cardCount < 200 || questionsWithoutAlbum > 0 || questionsCount < 100) {
+    if (cardCount === 0 || albumCount < 9 || !trista || !bemparida || cardCount < 200 || questionsWithoutAlbum > 0 || questionsCount < 100) {
       console.log("🌱 Base de dades pendent d'actualització d'àlbums/preguntes. Executant seed automàtic...");
       const { execSync } = require("child_process");
       execSync("npx tsx prisma/seed.ts", { stdio: "inherit" });
